@@ -40,42 +40,53 @@ namespace GoogleImageDownloader.Core.Services
             {
                 using (var http = new HttpClient())
                 {
-                    http.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3");
-                    CoreLogger.Log("Sending HTTP GET request...");
+                    http.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+                    http.DefaultRequestHeaders.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+                    http.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
+                    CoreLogger.Log("Sending HTTP GET request with desktop headers...");
                     var html = await http.GetStringAsync(url);
                     CoreLogger.Log($"Fetched HTML. Length: {html.Length}");
+                    CoreLogger.Log($"HTML Preview: >>>\n{html.Substring(0, Math.Min(100000, html.Length))}\n<<< END HTML Preview");
                     var doc = new HtmlDocument();
                     doc.LoadHtml(html);
                     CoreLogger.Log("HTML loaded into HtmlAgilityPack.");
+                    // Log all <div> class names in the HTML
+                    var divs = doc.DocumentNode.SelectNodes("//div[@class]");
+                    if (divs != null)
+                    {
+                        var classNames = new HashSet<string>();
+                        foreach (var div in divs)
+                        {
+                            var cls = div.GetAttributeValue("class", "");
+                            if (!string.IsNullOrWhiteSpace(cls))
+                                classNames.Add(cls);
+                        }
+                        CoreLogger.Log($"All <div> class names in HTML: {string.Join(", ", classNames)}");
+                    }
                     var results = new List<ImageResult>();
-                    var imgNodes = doc.DocumentNode.SelectNodes("//img[contains(@class, 'rg_i')]");
+                    // New selector for Google Images grid
+                    var imgNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'IUOThf')]//img[not(starts-with(@src, 'data:image/gif;base64'))]");
                     CoreLogger.Log($"imgNodes found: {(imgNodes == null ? 0 : imgNodes.Count)}");
                     if (imgNodes != null)
                     {
                         int imgIdx = 0;
                         foreach (var img in imgNodes)
                         {
-                            var imgUrl = img.GetAttributeValue("data-src", null) ?? img.GetAttributeValue("src", null);
-                            if (string.IsNullOrEmpty(imgUrl) || imgUrl.StartsWith("data:"))
+                            var imgUrl = img.GetAttributeValue("src", null);
+                            if (string.IsNullOrEmpty(imgUrl))
                             {
-                                CoreLogger.Log($"Skipping image {imgIdx}: No valid URL or base64.");
+                                CoreLogger.Log($"Skipping image {imgIdx}: No valid src.");
                                 continue;
                             }
                             var title = img.GetAttributeValue("alt", "");
-                            var parentA = img.ParentNode;
-                            string? sourcePage = null;
-                            while (parentA != null && parentA.Name != "a")
-                                parentA = parentA.ParentNode;
-                            if (parentA != null && parentA.Name == "a")
-                                sourcePage = parentA.GetAttributeValue("href", null);
                             results.Add(new ImageResult
                             {
                                 ImageUrl = imgUrl,
                                 ThumbnailUrl = imgUrl,
                                 Title = title,
-                                SourcePage = sourcePage
+                                SourcePage = null
                             });
-                            CoreLogger.Log($"Image {imgIdx}: URL={imgUrl}, Title={title}, Source={sourcePage}");
+                            CoreLogger.Log($"Image {imgIdx}: URL={imgUrl}, Title={title}");
                             imgIdx++;
                         }
                     }
