@@ -5,13 +5,13 @@ using GoogleImageDownloader.Core.Models;
 
 namespace GoogleImageDownloader.WinForms
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private readonly IGoogleImageSearchService _searchService;
         private readonly IImageDownloadService _downloadService;
         private readonly IRegistryService _registryService;
 
-        public Form1(IGoogleImageSearchService searchService, IImageDownloadService downloadService, IRegistryService registryService)
+        public MainForm(IGoogleImageSearchService searchService, IImageDownloadService downloadService, IRegistryService registryService)
         {
             _searchService = searchService;
             _downloadService = downloadService;

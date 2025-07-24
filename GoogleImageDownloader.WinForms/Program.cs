@@ -17,7 +17,7 @@ namespace GoogleImageDownloader.WinForms
             IGoogleImageSearchService searchService = new GoogleImageSearchService();
             IImageDownloadService downloadService = new ImageDownloadService();
             IRegistryService registryService = new RegistryService();
-            Application.Run(new Form1(searchService, downloadService, registryService));
+            Application.Run(new MainForm(searchService, downloadService, registryService));
         }
     }
 }
