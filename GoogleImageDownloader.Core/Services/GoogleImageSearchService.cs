@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using System.IO;
+using System.Linq;
 
 namespace GoogleImageDownloader.Core.Services
 {
@@ -50,18 +51,40 @@ namespace GoogleImageDownloader.Core.Services
                     var doc = new HtmlDocument();
                     doc.LoadHtml(html);
                     CoreLogger.Log("HTML loaded into HtmlAgilityPack.");
-                    // Log all <div> class names in the HTML
+                    CoreLogger.Log("[DEBUG] Entering advanced <div> class logging block.");
                     var divs = doc.DocumentNode.SelectNodes("//div[@class]");
                     if (divs != null)
                     {
-                        var classNames = new HashSet<string>();
+                        var classCount = new Dictionary<string, int>();
                         foreach (var div in divs)
                         {
-                            var cls = div.GetAttributeValue("class", "");
+                            var cls = div.GetAttributeValue("class", "").Trim();
                             if (!string.IsNullOrWhiteSpace(cls))
-                                classNames.Add(cls);
+                            {
+                                if (!classCount.ContainsKey(cls))
+                                    classCount[cls] = 0;
+                                classCount[cls]++;
+                            }
                         }
-                        CoreLogger.Log($"All <div> class names in HTML: {string.Join(", ", classNames)}");
+                        var topClasses = classCount.OrderByDescending(kv => kv.Value).Take(100).ToList();
+                        CoreLogger.Log($"Top <div> class names (count): {string.Join(", ", topClasses.Select(kv => $"{kv.Key} ({kv.Value})"))}");
+                        // Log first 5 <div> class names containing <img>
+                        int found = 0;
+                        foreach (var div in divs)
+                        {
+                            if (div.SelectSingleNode(".//img") != null)
+                            {
+                                var cls = div.GetAttributeValue("class", "").Trim();
+                                CoreLogger.Log($"First 5 <div> class names containing <img>: {cls}");
+                                found++;
+                                if (found >= 5) break;
+                            }
+                        }
+                        CoreLogger.Log("[DEBUG] Exiting advanced <div> class logging block.");
+                    }
+                    else
+                    {
+                        CoreLogger.Log("[DEBUG] No <div> elements with class found in HTML (divs == null)");
                     }
                     var results = new List<ImageResult>();
                     // New selector for Google Images grid
