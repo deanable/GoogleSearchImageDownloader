@@ -1,0 +1,133 @@
+using System;
+using System.Collections.Generic;
+using SearchImageDownloader.Core.Models;
+using SearchImageDownloader.Core.Interfaces;
+using System.Net.Http;
+using System.Threading.Tasks;
+using HtmlAgilityPack;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+
+namespace SearchImageDownloader.Core.Services
+{
+    public static class CoreLogger
+    {
+        private static string? logFilePath;
+        public static void Init(string path)
+        {
+            logFilePath = path;
+            File.AppendAllText(logFilePath, $"[CoreLogger] Initialized at {DateTime.Now}\r\n");
+        }
+        public static void Log(string message)
+        {
+            if (logFilePath == null) return;
+            File.AppendAllText(logFilePath, $"[{DateTime.Now:HH:mm:ss}] [Core] {message}\r\n");
+        }
+    }
+
+    public class GoogleImageSearchService : IImageSearchService
+    {
+        private readonly IRegistryService _registryService;
+        public GoogleImageSearchService(IRegistryService registryService)
+        {
+            _registryService = registryService;
+        }
+
+        public IEnumerable<ImageResult> SearchImages(SearchFilters filters)
+        {
+            var (apiKey, cseId) = _registryService.LoadGoogleApiCredentials();
+            if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(cseId))
+                throw new InvalidOperationException("Google API Key or CSE ID is not set in the registry.");
+            return SearchImagesAsync(filters, apiKey, cseId).GetAwaiter().GetResult();
+        }
+
+        private async Task<IEnumerable<ImageResult>> SearchImagesAsync(SearchFilters filters, string apiKey, string cseId)
+        {
+            var results = new List<ImageResult>();
+            try
+            {
+                var url = BuildGoogleCustomSearchUrl(filters, apiKey, cseId);
+                CoreLogger.Log($"Google Custom Search API URL: {url}");
+                using var http = new HttpClient();
+                var response = await http.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    CoreLogger.Log($"Google API error: {response.StatusCode} {response.ReasonPhrase}");
+                    return results;
+                }
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("items", out var items))
+                {
+                    foreach (var item in items.EnumerateArray())
+                    {
+                        var link = item.GetProperty("link").GetString();
+                        var title = item.GetProperty("title").GetString();
+                        var image = item.GetProperty("image");
+                        var thumbnail = image.TryGetProperty("thumbnailLink", out var thumbProp) ? thumbProp.GetString() : null;
+                        var context = image.TryGetProperty("contextLink", out var ctxProp) ? ctxProp.GetString() : null;
+                        results.Add(new ImageResult
+                        {
+                            ImageUrl = link,
+                            ThumbnailUrl = thumbnail,
+                            Title = title,
+                            SourcePage = context
+                        });
+                    }
+                }
+                else
+                {
+                    CoreLogger.Log("No items found in Google API response.");
+                }
+            }
+            catch (Exception ex)
+            {
+                CoreLogger.Log($"Exception in SearchImagesAsync: {ex.Message}\n{ex.StackTrace}");
+            }
+            return results;
+        }
+
+        private string BuildGoogleCustomSearchUrl(SearchFilters filters, string apiKey, string cseId)
+        {
+            var url = $"https://www.googleapis.com/customsearch/v1?key={apiKey}&cx={cseId}&searchType=image&q={Uri.EscapeDataString(filters.Query ?? "")}";
+            if (!string.IsNullOrEmpty(filters.Size) && filters.Size != "Any size")
+            {
+                // Google API: imgSize=icon|medium|large|xlarge|xxlarge|huge
+                var sizeMap = new Dictionary<string, string> { { "Icon", "icon" }, { "Medium", "medium" }, { "Large", "large" }, { "X-Large", "xlarge" }, { "XX-Large", "xxlarge" }, { "Huge", "huge" } };
+                if (sizeMap.TryGetValue(filters.Size, out var apiSize))
+                    url += $"&imgSize={apiSize}";
+            }
+            if (!string.IsNullOrEmpty(filters.Color) && filters.Color != "Any color")
+            {
+                // Google API: imgColorType=color|gray|mono|trans
+                var colorMap = new Dictionary<string, string> { { "Color", "color" }, { "Black and white", "gray" }, { "Transparent", "trans" } };
+                if (colorMap.TryGetValue(filters.Color, out var apiColor))
+                    url += $"&imgColorType={apiColor}";
+            }
+            if (!string.IsNullOrEmpty(filters.Type) && filters.Type != "Any type")
+            {
+                // Google API: imgType=clipart|face|lineart|news|photo
+                var typeMap = new Dictionary<string, string> { { "Photo", "photo" }, { "Clipart", "clipart" }, { "Lineart", "lineart" }, { "Face", "face" }, { "News", "news" } };
+                if (typeMap.TryGetValue(filters.Type, out var apiType))
+                    url += $"&imgType={apiType}";
+            }
+            if (!string.IsNullOrEmpty(filters.UsageRights) && filters.UsageRights != "Any rights")
+            {
+                // Google API: rights=cc_publicdomain|cc_attribute|cc_sharealike|cc_noncommercial|cc_nonderived
+                var rightsMap = new Dictionary<string, string> { { "Labeled for reuse", "cc_attribute" } };
+                if (rightsMap.TryGetValue(filters.UsageRights, out var apiRights))
+                    url += $"&rights={apiRights}";
+            }
+            if (!string.IsNullOrEmpty(filters.Time) && filters.Time != "Any time")
+            {
+                // Google API: dateRestrict=d[number] (d=days, w=weeks, m=months, y=years)
+                var timeMap = new Dictionary<string, string> { { "Past 24 hours", "d1" }, { "Past week", "w1" }, { "Past month", "m1" }, { "Past year", "y1" } };
+                if (timeMap.TryGetValue(filters.Time, out var apiTime))
+                    url += $"&dateRestrict={apiTime}";
+            }
+            return url;
+        }
+    }
+} 
