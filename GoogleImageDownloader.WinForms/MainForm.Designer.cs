@@ -39,6 +39,9 @@ partial class MainForm
         this.lvImages = new System.Windows.Forms.ListView();
         this.btnDownload = new System.Windows.Forms.Button();
         this.imageListLarge = new System.Windows.Forms.ImageList(this.components);
+        this.progressBar = new System.Windows.Forms.ProgressBar();
+        this.lblStatus = new System.Windows.Forms.Label();
+        this.txtLog = new System.Windows.Forms.TextBox();
         this.SuspendLayout();
         // 
         // txtSearch
@@ -97,7 +100,7 @@ partial class MainForm
         // 
         // btnDownload
         // 
-        this.btnDownload.Location = new System.Drawing.Point(12, 390);
+        this.btnDownload.Location = new System.Drawing.Point(12, 440);
         this.btnDownload.Size = new System.Drawing.Size(120, 30);
         this.btnDownload.Text = "Download Selected";
         // 
@@ -106,10 +109,36 @@ partial class MainForm
         this.imageListLarge.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
         this.imageListLarge.ImageSize = new System.Drawing.Size(128, 128);
         // 
+        // progressBar
+        // 
+        this.progressBar.Location = new System.Drawing.Point(12, 390);
+        this.progressBar.Size = new System.Drawing.Size(760, 20);
+        this.progressBar.Minimum = 0;
+        this.progressBar.Maximum = 100;
+        this.progressBar.Value = 0;
+        // 
+        // lblStatus
+        // 
+        this.lblStatus.Location = new System.Drawing.Point(12, 415);
+        this.lblStatus.Size = new System.Drawing.Size(760, 20);
+        this.lblStatus.Text = "Ready";
+        // 
+        // txtLog
+        // 
+        this.txtLog.Location = new System.Drawing.Point(12, 480);
+        this.txtLog.Size = new System.Drawing.Size(800, 100);
+        this.txtLog.Multiline = true;
+        this.txtLog.ReadOnly = true;
+        this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+        this.txtLog.WordWrap = false;
+        // 
         // Form1
         // 
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(840, 440);
+        this.ClientSize = new System.Drawing.Size(840, 600);
+        this.Controls.Add(this.txtLog);
+        this.Controls.Add(this.progressBar);
+        this.Controls.Add(this.lblStatus);
         this.Controls.Add(this.txtSearch);
         this.Controls.Add(this.btnSearch);
         this.Controls.Add(this.cmbSize);
@@ -136,4 +165,7 @@ partial class MainForm
     private System.Windows.Forms.ListView lvImages;
     private System.Windows.Forms.Button btnDownload;
     private System.Windows.Forms.ImageList imageListLarge;
+    private System.Windows.Forms.ProgressBar progressBar;
+    private System.Windows.Forms.Label lblStatus;
+    private System.Windows.Forms.TextBox txtLog;
 }
