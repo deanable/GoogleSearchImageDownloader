@@ -48,6 +48,12 @@ namespace GoogleImageDownloader.Core.Services
                     var html = await http.GetStringAsync(url);
                     CoreLogger.Log($"Fetched HTML. Length: {html.Length}");
                     CoreLogger.Log($"HTML Preview: >>>\n{html.Substring(0, Math.Min(100000, html.Length))}\n<<< END HTML Preview");
+                    // Save full HTML to a file for manual inspection
+                    var htmlDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+                    if (!Directory.Exists(htmlDir)) Directory.CreateDirectory(htmlDir);
+                    var htmlFilePath = Path.Combine(htmlDir, $"html_{DateTime.Now:yyyyMMdd_HHmmss}.html");
+                    File.WriteAllText(htmlFilePath, html);
+                    CoreLogger.Log($"[DEBUG] Full HTML saved to: {htmlFilePath}");
                     var doc = new HtmlDocument();
                     doc.LoadHtml(html);
                     CoreLogger.Log("HTML loaded into HtmlAgilityPack.");
@@ -87,31 +93,91 @@ namespace GoogleImageDownloader.Core.Services
                         CoreLogger.Log("[DEBUG] No <div> elements with class found in HTML (divs == null)");
                     }
                     var results = new List<ImageResult>();
-                    // New selector for Google Images grid
-                    var imgNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'IUOThf')]//img[not(starts-with(@src, 'data:image/gif;base64'))]");
-                    CoreLogger.Log($"imgNodes found: {(imgNodes == null ? 0 : imgNodes.Count)}");
-                    if (imgNodes != null)
+                    CoreLogger.Log("[DEBUG] Attempting to select islrc grid container...");
+                    var grid = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'islrc')]");
+                    if (grid != null)
                     {
-                        int imgIdx = 0;
-                        foreach (var img in imgNodes)
+                        CoreLogger.Log($"[DEBUG] islrc grid found. OuterHtml (first 500 chars): {grid.OuterHtml.Substring(0, Math.Min(500, grid.OuterHtml.Length))}");
+                        var imageDivs = grid.SelectNodes(".//div[contains(@class, 'isv-r')]");
+                        if (imageDivs == null || imageDivs.Count == 0)
                         {
-                            var imgUrl = img.GetAttributeValue("src", null);
-                            if (string.IsNullOrEmpty(imgUrl))
-                            {
-                                CoreLogger.Log($"Skipping image {imgIdx}: No valid src.");
-                                continue;
-                            }
-                            var title = img.GetAttributeValue("alt", "");
-                            results.Add(new ImageResult
-                            {
-                                ImageUrl = imgUrl,
-                                ThumbnailUrl = imgUrl,
-                                Title = title,
-                                SourcePage = null
-                            });
-                            CoreLogger.Log($"Image {imgIdx}: URL={imgUrl}, Title={title}");
-                            imgIdx++;
+                            CoreLogger.Log("[DEBUG] No isv-r image blocks found in islrc grid. Selector may need adjustment.");
                         }
+                        else
+                        {
+                            CoreLogger.Log($"[DEBUG] isv-r image blocks found: {imageDivs.Count}");
+                        }
+                        if (imageDivs != null)
+                        {
+                            int imgIdx = 0;
+                            foreach (var div in imageDivs)
+                            {
+                                if (imgIdx == 0)
+                                {
+                                    // Log the raw HTML of the first isv-r block for template refinement
+                                    CoreLogger.Log($"[DEBUG] First isv-r block HTML: {div.OuterHtml.Substring(0, Math.Min(2000, div.OuterHtml.Length))}");
+                                }
+                                string? thumbUrl = null;
+                                string? highResUrl = null;
+                                string? sourcePage = null;
+                                string? title = null;
+                                // 1. Get thumbnail from first <img> (skip gif)
+                                var imgNode = div.SelectSingleNode(".//img[not(starts-with(@src, 'data:image/gif'))]");
+                                if (imgNode != null)
+                                {
+                                    thumbUrl = imgNode.GetAttributeValue("src", null);
+                                    title = imgNode.GetAttributeValue("alt", "");
+                                }
+                                // 2. Try to get high-res and source from <script> JSON
+                                var scriptNode = div.SelectSingleNode(".//script");
+                                if (scriptNode != null && !string.IsNullOrWhiteSpace(scriptNode.InnerText))
+                                {
+                                    var json = scriptNode.InnerText;
+                                    try
+                                    {
+                                        var match = System.Text.RegularExpressions.Regex.Match(json, @"""ou"":""(.*?)""");
+                                        if (match.Success)
+                                            highResUrl = match.Groups[1].Value;
+                                        var match2 = System.Text.RegularExpressions.Regex.Match(json, @"""ru"":""(.*?)""");
+                                        if (match2.Success)
+                                            sourcePage = match2.Groups[1].Value;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        CoreLogger.Log($"[DEBUG] Exception parsing script JSON: {ex.Message}");
+                                    }
+                                }
+                                // 3. Fallback: try data-bem or data-objurl attributes (legacy, rare)
+                                if (string.IsNullOrEmpty(highResUrl))
+                                {
+                                    var dataBem = div.GetAttributeValue("data-bem", null);
+                                    if (!string.IsNullOrEmpty(dataBem))
+                                    {
+                                        var match3 = System.Text.RegularExpressions.Regex.Match(dataBem, @"""img_url"":""(.*?)""");
+                                        if (match3.Success)
+                                            highResUrl = match3.Groups[1].Value;
+                                    }
+                                }
+                                // 4. Fallback to thumbnail if no high-res
+                                if (string.IsNullOrEmpty(highResUrl))
+                                    highResUrl = thumbUrl;
+                                results.Add(new ImageResult
+                                {
+                                    ImageUrl = highResUrl,
+                                    ThumbnailUrl = thumbUrl,
+                                    Title = title,
+                                    SourcePage = sourcePage
+                                });
+                                CoreLogger.Log($"[DEBUG] Image {imgIdx}: thumb={thumbUrl}, highRes={highResUrl}, source={sourcePage}, title={title}");
+                                imgIdx++;
+                            }
+                        }
+                        CoreLogger.Log($"Total images parsed: {results.Count}");
+                        return results;
+                    }
+                    else
+                    {
+                        CoreLogger.Log("[DEBUG] islrc grid not found in HTML. Selector may need adjustment.");
                     }
                     CoreLogger.Log($"Total images parsed: {results.Count}");
                     return results;
