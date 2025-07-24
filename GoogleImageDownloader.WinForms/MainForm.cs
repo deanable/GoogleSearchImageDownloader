@@ -67,68 +67,98 @@ namespace GoogleImageDownloader.WinForms
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            btnSearch.Enabled = false;
+            btnDownload.Enabled = false;
             lvImages.Items.Clear();
             imageListLarge.Images.Clear();
-            var filters = new SearchFilters
+            try
             {
-                Query = txtSearch.Text,
-                Size = cmbSize.SelectedItem?.ToString() ?? "Any size",
-                Color = cmbColor.SelectedItem?.ToString() ?? "Any color",
-                UsageRights = cmbUsageRights.SelectedItem?.ToString() ?? "Any rights",
-                Type = cmbType.SelectedItem?.ToString() ?? "Any type",
-                Time = cmbTime.SelectedItem?.ToString() ?? "Any time"
-            };
-            var results = _searchService.SearchImages(filters);
-            int idx = 0;
-            foreach (var img in results)
-            {
-                // Download thumbnail (synchronously for now)
-                System.Drawing.Image thumb = null;
-                try
+                var filters = new SearchFilters
                 {
-                    using (var wc = new System.Net.WebClient())
+                    Query = txtSearch.Text,
+                    Size = cmbSize.SelectedItem?.ToString() ?? "Any size",
+                    Color = cmbColor.SelectedItem?.ToString() ?? "Any color",
+                    UsageRights = cmbUsageRights.SelectedItem?.ToString() ?? "Any rights",
+                    Type = cmbType.SelectedItem?.ToString() ?? "Any type",
+                    Time = cmbTime.SelectedItem?.ToString() ?? "Any time"
+                };
+                var results = _searchService.SearchImages(filters);
+                int idx = 0;
+                foreach (var img in results)
+                {
+                    System.Drawing.Image thumb = null;
+                    try
                     {
-                        using (var stream = wc.OpenRead(img.ThumbnailUrl))
+                        using (var wc = new System.Net.WebClient())
                         {
-                            thumb = System.Drawing.Image.FromStream(stream);
+                            using (var stream = wc.OpenRead(img.ThumbnailUrl))
+                            {
+                                thumb = System.Drawing.Image.FromStream(stream);
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        // Optionally log ex
+                        thumb = null;
+                    }
+                    if (thumb != null)
+                    {
+                        imageListLarge.Images.Add(idx.ToString(), thumb);
+                    }
+                    var item = new ListViewItem(img.Title ?? "Image")
+                    {
+                        ImageIndex = thumb != null ? idx : -1,
+                        Tag = img
+                    };
+                    lvImages.Items.Add(item);
+                    idx++;
                 }
-                catch { thumb = null; }
-                if (thumb != null)
-                {
-                    imageListLarge.Images.Add(idx.ToString(), thumb);
-                }
-                var item = new ListViewItem(img.Title ?? "Image")
-                {
-                    ImageIndex = thumb != null ? idx : -1,
-                    Tag = img
-                };
-                lvImages.Items.Add(item);
-                idx++;
-                // TODO: Implement lazy loading for large result sets
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred during search:\n{ex.Message}", "Search Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnSearch.Enabled = true;
+                btnDownload.Enabled = true;
             }
         }
 
         private void btnDownload_Click(object sender, EventArgs e)
         {
-            var selectedImages = new List<GoogleImageDownloader.Core.Models.ImageResult>();
-            foreach (ListViewItem item in lvImages.CheckedItems)
+            btnSearch.Enabled = false;
+            btnDownload.Enabled = false;
+            try
             {
-                if (item.Tag is GoogleImageDownloader.Core.Models.ImageResult img)
-                    selectedImages.Add(img);
+                var selectedImages = new List<GoogleImageDownloader.Core.Models.ImageResult>();
+                foreach (ListViewItem item in lvImages.CheckedItems)
+                {
+                    if (item.Tag is GoogleImageDownloader.Core.Models.ImageResult img)
+                        selectedImages.Add(img);
+                }
+                if (selectedImages.Count == 0)
+                {
+                    MessageBox.Show("Please select images to download.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                var searchTerm = txtSearch.Text.Trim();
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var downloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+                var targetFolder = Path.Combine(downloads, $"{searchTerm}_{timestamp}");
+                _downloadService.DownloadImages(selectedImages, targetFolder);
+                MessageBox.Show($"Downloaded {selectedImages.Count} images to:\n{targetFolder}", "Download Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            if (selectedImages.Count == 0)
+            catch (Exception ex)
             {
-                MessageBox.Show("Please select images to download.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
+                MessageBox.Show($"An error occurred during download:\n{ex.Message}", "Download Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            var searchTerm = txtSearch.Text.Trim();
-            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            var downloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
-            var targetFolder = Path.Combine(downloads, $"{searchTerm}_{timestamp}");
-            _downloadService.DownloadImages(selectedImages, targetFolder);
-            MessageBox.Show($"Downloaded {selectedImages.Count} images to:\n{targetFolder}", "Download Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            finally
+            {
+                btnSearch.Enabled = true;
+                btnDownload.Enabled = true;
+            }
         }
     }
 }
