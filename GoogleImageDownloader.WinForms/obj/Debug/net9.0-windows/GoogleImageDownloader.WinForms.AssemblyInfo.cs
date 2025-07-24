@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GoogleImageDownloader.WinForms")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd914edf6adc0415a3ad98739e54f730b92b5fb1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8b80f6d1ecfe6bf462997ed9aa5e81e511c1062c")]
 [assembly: System.Reflection.AssemblyProductAttribute("GoogleImageDownloader.WinForms")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GoogleImageDownloader.WinForms")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

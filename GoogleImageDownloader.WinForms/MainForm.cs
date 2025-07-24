@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GoogleImageDownloader.Core.Services;
 
 namespace GoogleImageDownloader.WinForms
 {
@@ -42,6 +43,7 @@ namespace GoogleImageDownloader.WinForms
             if (!Directory.Exists(logDir)) Directory.CreateDirectory(logDir);
             logFilePath = Path.Combine(logDir, $"log_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
             Log($"Log started for session at {DateTime.Now}");
+            CoreLogger.Init(logFilePath);
         }
 
         private void LoadFiltersFromRegistry()
@@ -74,10 +76,11 @@ namespace GoogleImageDownloader.WinForms
             SaveFiltersToRegistry();
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void Form1_FormClosing(object? sender, FormClosingEventArgs e)
         {
             SaveFiltersToRegistry();
             Log($"Log ended for session at {DateTime.Now}");
+            CoreLogger.Log($"Log ended for session at {DateTime.Now}");
         }
 
         private void InitializeLazyLoading()
