@@ -65,7 +65,7 @@ namespace GoogleImageDownloader.WinForms
             SaveFiltersToRegistry();
         }
 
-        private void btnSearch_Click(object sender, EventArgs e)
+        private async void btnSearch_Click(object? sender, EventArgs e)
         {
             btnSearch.Enabled = false;
             btnDownload.Enabled = false;
@@ -84,35 +84,38 @@ namespace GoogleImageDownloader.WinForms
                 };
                 var results = _searchService.SearchImages(filters);
                 int idx = 0;
-                foreach (var img in results)
+                using (var http = new System.Net.Http.HttpClient())
                 {
-                    System.Drawing.Image thumb = null;
-                    try
+                    foreach (var img in results)
                     {
-                        using (var wc = new System.Net.WebClient())
+                        System.Drawing.Image? thumb = null;
+                        try
                         {
-                            using (var stream = wc.OpenRead(img.ThumbnailUrl))
+                            if (!string.IsNullOrEmpty(img.ThumbnailUrl))
                             {
-                                thumb = System.Drawing.Image.FromStream(stream);
+                                var data = await http.GetByteArrayAsync(img.ThumbnailUrl);
+                                using (var ms = new System.IO.MemoryStream(data))
+                                {
+                                    thumb = System.Drawing.Image.FromStream(ms);
+                                }
                             }
                         }
+                        catch
+                        {
+                            thumb = null;
+                        }
+                        if (thumb != null)
+                        {
+                            imageListLarge.Images.Add(idx.ToString(), thumb);
+                        }
+                        var item = new ListViewItem(img.Title ?? "Image")
+                        {
+                            ImageIndex = thumb != null ? idx : -1,
+                            Tag = img
+                        };
+                        lvImages.Items.Add(item);
+                        idx++;
                     }
-                    catch (Exception ex)
-                    {
-                        // Optionally log ex
-                        thumb = null;
-                    }
-                    if (thumb != null)
-                    {
-                        imageListLarge.Images.Add(idx.ToString(), thumb);
-                    }
-                    var item = new ListViewItem(img.Title ?? "Image")
-                    {
-                        ImageIndex = thumb != null ? idx : -1,
-                        Tag = img
-                    };
-                    lvImages.Items.Add(item);
-                    idx++;
                 }
             }
             catch (Exception ex)
@@ -126,7 +129,7 @@ namespace GoogleImageDownloader.WinForms
             }
         }
 
-        private void btnDownload_Click(object sender, EventArgs e)
+        private async void btnDownload_Click(object? sender, EventArgs e)
         {
             btnSearch.Enabled = false;
             btnDownload.Enabled = false;
@@ -147,7 +150,7 @@ namespace GoogleImageDownloader.WinForms
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 var downloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
                 var targetFolder = Path.Combine(downloads, $"{searchTerm}_{timestamp}");
-                _downloadService.DownloadImages(selectedImages, targetFolder);
+                await _downloadService.DownloadImagesAsync(selectedImages, targetFolder);
                 MessageBox.Show($"Downloaded {selectedImages.Count} images to:\n{targetFolder}", "Download Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)

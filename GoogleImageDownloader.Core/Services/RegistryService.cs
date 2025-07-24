@@ -8,6 +8,7 @@ namespace GoogleImageDownloader.Core.Services
     {
         private const string RegistryPath = @"Software\\GoogleImageDownloader\\Filters";
 
+        #pragma warning disable CA1416
         public void SaveFilters(SearchFilters filters)
         {
             using (var key = Registry.CurrentUser.CreateSubKey(RegistryPath))
@@ -37,5 +38,6 @@ namespace GoogleImageDownloader.Core.Services
                 };
             }
         }
+        #pragma warning restore CA1416
     }
 } 

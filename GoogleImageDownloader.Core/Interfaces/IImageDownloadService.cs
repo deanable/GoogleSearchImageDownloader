@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using GoogleImageDownloader.Core.Models;
 
 namespace GoogleImageDownloader.Core.Interfaces
 {
     public interface IImageDownloadService
     {
-        void DownloadImages(IEnumerable<ImageResult> images, string targetFolder);
+        Task DownloadImagesAsync(IEnumerable<ImageResult> images, string targetFolder);
     }
 } 
