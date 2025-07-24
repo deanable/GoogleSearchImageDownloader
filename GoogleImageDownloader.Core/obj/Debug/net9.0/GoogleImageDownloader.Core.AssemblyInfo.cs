@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GoogleImageDownloader.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+316b525c3586cf26bfc8bf8debf17d83cc5b61eb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3cdee4226eef273d6c7acfcf155b03a3d10b8551")]
 [assembly: System.Reflection.AssemblyProductAttribute("GoogleImageDownloader.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GoogleImageDownloader.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
