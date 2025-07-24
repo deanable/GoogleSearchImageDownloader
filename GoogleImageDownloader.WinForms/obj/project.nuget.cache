@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "HBjzfZx79Rk=",
+  "dgSpecHash": "7/kOq+bn+6c=",
   "success": true,
   "projectFilePath": "C:\\Users\\User\\source\\repos\\Google Search Image Downloader\\GoogleImageDownloader.WinForms\\GoogleImageDownloader.WinForms.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\User\\.nuget\\packages\\htmlagilitypack\\1.12.2\\htmlagilitypack.1.12.2.nupkg.sha512"
+  ],
   "logs": []
 }

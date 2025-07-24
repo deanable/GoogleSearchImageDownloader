@@ -2,6 +2,8 @@ using System;
 using System.Windows.Forms;
 using GoogleImageDownloader.Core.Interfaces;
 using GoogleImageDownloader.Core.Models;
+using System.Collections.Generic;
+using System.IO;
 
 namespace GoogleImageDownloader.WinForms
 {
@@ -110,7 +112,23 @@ namespace GoogleImageDownloader.WinForms
 
         private void btnDownload_Click(object sender, EventArgs e)
         {
-            // TODO: Get selected images from lvImages and call _downloadService.DownloadImages
+            var selectedImages = new List<GoogleImageDownloader.Core.Models.ImageResult>();
+            foreach (ListViewItem item in lvImages.CheckedItems)
+            {
+                if (item.Tag is GoogleImageDownloader.Core.Models.ImageResult img)
+                    selectedImages.Add(img);
+            }
+            if (selectedImages.Count == 0)
+            {
+                MessageBox.Show("Please select images to download.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            var searchTerm = txtSearch.Text.Trim();
+            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var downloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            var targetFolder = Path.Combine(downloads, $"{searchTerm}_{timestamp}");
+            _downloadService.DownloadImages(selectedImages, targetFolder);
+            MessageBox.Show($"Downloaded {selectedImages.Count} images to:\n{targetFolder}", "Download Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
