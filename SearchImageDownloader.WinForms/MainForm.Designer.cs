@@ -170,6 +170,7 @@ partial class MainForm
         gbFilters.Controls.Add(cmbColor);
         gbFilters.Controls.Add(btnSearch);
         gbFilters.Controls.Add(cmbSize);
+        gbFilters.Dock = DockStyle.Top;
         gbFilters.Location = new Point(12, 12);
         gbFilters.Name = "gbFilters";
         gbFilters.Size = new Size(830, 64);
@@ -180,6 +181,7 @@ partial class MainForm
         // gbResults
         // 
         gbResults.Controls.Add(lvImages);
+        gbResults.Dock = DockStyle.Fill;
         gbResults.Location = new Point(12, 82);
         gbResults.Name = "gbResults";
         gbResults.Size = new Size(1023, 328);
@@ -192,6 +194,7 @@ partial class MainForm
         gbStatus.Controls.Add(lblStatus);
         gbStatus.Controls.Add(progressBar);
         gbStatus.Controls.Add(txtLog);
+        gbStatus.Dock = DockStyle.Bottom;
         gbStatus.Location = new Point(12, 416);
         gbStatus.Name = "gbStatus";
         gbStatus.Size = new Size(1018, 155);
