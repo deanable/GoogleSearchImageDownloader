@@ -29,10 +29,10 @@ namespace SearchImageDownloader.WinForms
 
         public MainForm(IImageSearchService searchService, IImageDownloadService downloadService, IRegistryService registryService)
         {
+            InitializeComponent(); // Must be first!
             _searchService = searchService;
             _downloadService = downloadService;
             _registryService = registryService;
-            InitializeComponent();
             LoadFiltersFromRegistry();
             btnSearch.Click += btnSearch_Click;
             btnDownload.Click += btnDownload_Click;
