@@ -40,6 +40,11 @@ namespace SearchImageDownloader.WinForms
             cmbTime.SelectedIndexChanged += FilterChanged;
             this.FormClosing += Form1_FormClosing;
             InitializeLazyLoading();
+            lvImages.MouseWheel += LvImages_MouseWheel;
+            lvImages.HandleCreated += (s, e) =>
+            {
+                NativeMethods.SetScrollEvent(lvImages, OnListViewScroll);
+            };
             // Setup log file
             var logDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
             if (!Directory.Exists(logDir)) Directory.CreateDirectory(logDir);
@@ -256,19 +261,49 @@ namespace SearchImageDownloader.WinForms
             }
         }
 
-        // Add WndProc override for infinite scrolling
-        protected override void WndProc(ref Message m)
+        private void LvImages_MouseWheel(object? sender, MouseEventArgs e)
         {
-            base.WndProc(ref m);
-            const int WM_VSCROLL = 0x0115;
-            if (m.Msg == WM_VSCROLL && lvImages.Focused)
+            CheckAndLoadMoreOnScroll();
+        }
+
+        private void OnListViewScroll()
+        {
+            CheckAndLoadMoreOnScroll();
+        }
+
+        private void CheckAndLoadMoreOnScroll()
+        {
+            if (lvImages.Items.Count == 0) return;
+            var lastItem = lvImages.Items[lvImages.Items.Count - 1];
+            if (lvImages.ClientRectangle.IntersectsWith(lastItem.Bounds) && allResults.Count < totalResults)
             {
-                if (lvImages.Items.Count > 0 && lvImages.TopItem != null)
+                LoadMoreResultsIfNeeded();
+            }
+        }
+
+        // Native interop for scroll event
+        private static class NativeMethods
+        {
+            public delegate void ScrollEventDelegate();
+            public static void SetScrollEvent(Control control, ScrollEventDelegate callback)
+            {
+                var wndProc = new WndProcHandler(control, callback);
+            }
+            private class WndProcHandler : NativeWindow
+            {
+                private readonly ScrollEventDelegate _callback;
+                public WndProcHandler(Control control, ScrollEventDelegate callback)
                 {
-                    int lastVisible = lvImages.TopItem.Index + lvImages.ClientSize.Height / lvImages.TopItem.Bounds.Height;
-                    if (lastVisible >= lvImages.Items.Count - 5 && allResults.Count < totalResults)
+                    _callback = callback;
+                    AssignHandle(control.Handle);
+                }
+                protected override void WndProc(ref Message m)
+                {
+                    base.WndProc(ref m);
+                    const int WM_VSCROLL = 0x0115;
+                    if (m.Msg == WM_VSCROLL)
                     {
-                        LoadMoreResultsIfNeeded();
+                        _callback();
                     }
                 }
             }

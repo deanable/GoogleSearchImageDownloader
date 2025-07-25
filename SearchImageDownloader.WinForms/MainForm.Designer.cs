@@ -42,10 +42,12 @@ partial class MainForm
         progressBar = new ProgressBar();
         lblStatus = new Label();
         txtLog = new TextBox();
-        groupBox1 = new GroupBox();
-        groupBox2 = new GroupBox();
-        groupBox1.SuspendLayout();
-        groupBox2.SuspendLayout();
+        gbFilters = new GroupBox();
+        gbResults = new GroupBox();
+        gbStatus = new GroupBox();
+        gbFilters.SuspendLayout();
+        gbResults.SuspendLayout();
+        gbStatus.SuspendLayout();
         SuspendLayout();
         // 
         // txtSearch
@@ -127,7 +129,7 @@ partial class MainForm
         // 
         // btnDownload
         // 
-        btnDownload.Location = new Point(12, 483);
+        btnDownload.Location = new Point(857, 14);
         btnDownload.Name = "btnDownload";
         btnDownload.Size = new Size(80, 63);
         btnDownload.TabIndex = 11;
@@ -135,74 +137,85 @@ partial class MainForm
         // 
         // progressBar
         // 
-        progressBar.Location = new Point(12, 551);
+        progressBar.Location = new Point(6, 121);
         progressBar.Name = "progressBar";
-        progressBar.Size = new Size(1020, 20);
+        progressBar.Size = new Size(1006, 20);
         progressBar.TabIndex = 1;
         // 
         // lblStatus
         // 
-        lblStatus.Location = new Point(12, 415);
+        lblStatus.Location = new Point(6, 22);
         lblStatus.Name = "lblStatus";
-        lblStatus.Size = new Size(1020, 28);
+        lblStatus.Size = new Size(1006, 28);
         lblStatus.TabIndex = 2;
         lblStatus.Text = "Ready";
         // 
         // txtLog
         // 
-        txtLog.Location = new Point(232, 483);
+        txtLog.Location = new Point(6, 53);
         txtLog.Multiline = true;
         txtLog.Name = "txtLog";
         txtLog.ReadOnly = true;
         txtLog.ScrollBars = ScrollBars.Vertical;
-        txtLog.Size = new Size(800, 63);
+        txtLog.Size = new Size(1006, 63);
         txtLog.TabIndex = 0;
         txtLog.WordWrap = false;
         // 
-        // groupBox1
+        // gbFilters
         // 
-        groupBox1.Controls.Add(txtSearch);
-        groupBox1.Controls.Add(cmbTime);
-        groupBox1.Controls.Add(cmbType);
-        groupBox1.Controls.Add(cmbUsageRights);
-        groupBox1.Controls.Add(cmbColor);
-        groupBox1.Controls.Add(btnSearch);
-        groupBox1.Controls.Add(cmbSize);
-        groupBox1.Location = new Point(12, 12);
-        groupBox1.Name = "groupBox1";
-        groupBox1.Size = new Size(830, 64);
-        groupBox1.TabIndex = 12;
-        groupBox1.TabStop = false;
-        groupBox1.Text = "Search Filters";
+        gbFilters.Controls.Add(txtSearch);
+        gbFilters.Controls.Add(cmbTime);
+        gbFilters.Controls.Add(cmbType);
+        gbFilters.Controls.Add(cmbUsageRights);
+        gbFilters.Controls.Add(cmbColor);
+        gbFilters.Controls.Add(btnSearch);
+        gbFilters.Controls.Add(cmbSize);
+        gbFilters.Location = new Point(12, 12);
+        gbFilters.Name = "gbFilters";
+        gbFilters.Size = new Size(830, 64);
+        gbFilters.TabIndex = 12;
+        gbFilters.TabStop = false;
+        gbFilters.Text = "Search Filters";
         // 
-        // groupBox2
+        // gbResults
         // 
-        groupBox2.Controls.Add(lvImages);
-        groupBox2.Location = new Point(12, 82);
-        groupBox2.Name = "groupBox2";
-        groupBox2.Size = new Size(1023, 328);
-        groupBox2.TabIndex = 13;
-        groupBox2.TabStop = false;
-        groupBox2.Text = "Results";
+        gbResults.Controls.Add(lvImages);
+        gbResults.Location = new Point(12, 82);
+        gbResults.Name = "gbResults";
+        gbResults.Size = new Size(1023, 328);
+        gbResults.TabIndex = 13;
+        gbResults.TabStop = false;
+        gbResults.Text = "Results";
+        // 
+        // gbStatus
+        // 
+        gbStatus.Controls.Add(lblStatus);
+        gbStatus.Controls.Add(progressBar);
+        gbStatus.Controls.Add(txtLog);
+        gbStatus.Location = new Point(12, 416);
+        gbStatus.Name = "gbStatus";
+        gbStatus.Size = new Size(1018, 155);
+        gbStatus.TabIndex = 14;
+        gbStatus.TabStop = false;
+        gbStatus.Text = "Status";
         // 
         // MainForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(1047, 583);
-        Controls.Add(groupBox2);
-        Controls.Add(groupBox1);
-        Controls.Add(txtLog);
-        Controls.Add(progressBar);
-        Controls.Add(lblStatus);
+        Controls.Add(gbStatus);
+        Controls.Add(gbResults);
+        Controls.Add(gbFilters);
         Controls.Add(btnDownload);
         Name = "MainForm";
         Text = "Google Image Downloader";
-        groupBox1.ResumeLayout(false);
-        groupBox1.PerformLayout();
-        groupBox2.ResumeLayout(false);
+        gbFilters.ResumeLayout(false);
+        gbFilters.PerformLayout();
+        gbResults.ResumeLayout(false);
+        gbStatus.ResumeLayout(false);
+        gbStatus.PerformLayout();
         ResumeLayout(false);
-        PerformLayout();
     }
 
     #endregion
@@ -220,6 +233,7 @@ partial class MainForm
     private System.Windows.Forms.ProgressBar progressBar;
     private System.Windows.Forms.Label lblStatus;
     private System.Windows.Forms.TextBox txtLog;
-    private GroupBox groupBox1;
-    private GroupBox groupBox2;
+    private GroupBox gbFilters;
+    private GroupBox gbResults;
+    private GroupBox gbStatus;
 }
