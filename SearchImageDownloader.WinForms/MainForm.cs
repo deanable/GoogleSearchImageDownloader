@@ -19,7 +19,6 @@ namespace SearchImageDownloader.WinForms
         private const int PageSize = 30;
         private List<SearchImageDownloader.Core.Models.ImageResult> allResults = new();
         private int currentPage = 0;
-        private Button btnLoadMore;
         private readonly string logFilePath;
         private int totalResults = 0;
         private int pageSize = 10; // Google API max per request
@@ -88,13 +87,7 @@ namespace SearchImageDownloader.WinForms
 
         private void InitializeLazyLoading()
         {
-            btnLoadMore = new Button();
-            btnLoadMore.Text = "Load More";
-            btnLoadMore.Size = new System.Drawing.Size(120, 30);
-            btnLoadMore.Location = new System.Drawing.Point(140, 440);
-            btnLoadMore.Click += BtnLoadMore_Click;
-            this.Controls.Add(btnLoadMore);
-            btnLoadMore.Visible = false;
+            // Remove all references to btnLoadMore and related logic
         }
 
         private void Log(string message)
@@ -206,18 +199,7 @@ namespace SearchImageDownloader.WinForms
             await Task.Run(() => LoadNextPageThreaded());
         }
 
-        private void BtnLoadMore_Click(object? sender, EventArgs e)
-        {
-            Log("Load More button clicked.");
-            try
-            {
-                LoadNextPageThreaded();
-            }
-            catch (Exception ex)
-            {
-                Log($"Exception in LoadNextPageThreaded: {ex.Message}\n{ex.StackTrace}");
-            }
-        }
+        // Remove all references to btnLoadMore and related logic
 
         private async void btnDownload_Click(object? sender, EventArgs e)
         {
@@ -348,8 +330,8 @@ namespace SearchImageDownloader.WinForms
             currentPage++;
             Invoke(new Action(() =>
             {
-                btnLoadMore.Visible = allResults.Count < totalResults;
-                lblStatus.Text = btnLoadMore.Visible ? $"Loaded {end} of {totalResults}. Scroll for more." : $"All {totalResults} images loaded.";
+                // Remove all references to btnLoadMore and related logic
+                lblStatus.Text = $"All {totalResults} images loaded.";
                 Log($"Loaded images {start + 1}-{end}.");
             }));
         }

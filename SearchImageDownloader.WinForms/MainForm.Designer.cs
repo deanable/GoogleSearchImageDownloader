@@ -127,15 +127,15 @@ partial class MainForm
         // 
         // btnDownload
         // 
-        btnDownload.Location = new Point(12, 516);
+        btnDownload.Location = new Point(12, 483);
         btnDownload.Name = "btnDownload";
-        btnDownload.Size = new Size(214, 30);
+        btnDownload.Size = new Size(80, 63);
         btnDownload.TabIndex = 11;
         btnDownload.Text = "Download Selected";
         // 
         // progressBar
         // 
-        progressBar.Location = new Point(18, 552);
+        progressBar.Location = new Point(12, 551);
         progressBar.Name = "progressBar";
         progressBar.Size = new Size(1020, 20);
         progressBar.TabIndex = 1;
@@ -144,18 +144,18 @@ partial class MainForm
         // 
         lblStatus.Location = new Point(12, 415);
         lblStatus.Name = "lblStatus";
-        lblStatus.Size = new Size(214, 98);
+        lblStatus.Size = new Size(1020, 28);
         lblStatus.TabIndex = 2;
         lblStatus.Text = "Ready";
         // 
         // txtLog
         // 
-        txtLog.Location = new Point(232, 416);
+        txtLog.Location = new Point(232, 483);
         txtLog.Multiline = true;
         txtLog.Name = "txtLog";
         txtLog.ReadOnly = true;
         txtLog.ScrollBars = ScrollBars.Vertical;
-        txtLog.Size = new Size(800, 130);
+        txtLog.Size = new Size(800, 63);
         txtLog.TabIndex = 0;
         txtLog.WordWrap = false;
         // 
