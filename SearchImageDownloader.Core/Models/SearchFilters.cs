@@ -10,5 +10,6 @@ namespace SearchImageDownloader.Core.Models
         public string? Query { get; set; } // The search term
         public int Start { get; set; } = 1; // Google API: 1-based index
         public int Num { get; set; } = 10; // Google API: max 10 per request
+        public int? MinFileSizeBytes { get; set; } // Optional minimum file size in bytes
     }
 } 

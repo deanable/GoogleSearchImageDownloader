@@ -240,4 +240,6 @@ partial class MainForm
     private GroupBox gbFilters;
     private GroupBox gbResults;
     private GroupBox gbStatus;
+    private System.Windows.Forms.NumericUpDown numMinFileSize;
+    private System.Windows.Forms.Label lblMinFileSize;
 }

@@ -125,7 +125,7 @@ namespace SearchImageDownloader.Core.Services
             int totalResults = 0;
             try
             {
-                CoreLogger.Log($"SearchImagesAsync called with filters: Query='{filters.Query}', Size='{filters.Size}', Color='{filters.Color}', UsageRights='{filters.UsageRights}', Type='{filters.Type}', Time='{filters.Time}', Start={filters.Start}, Num={filters.Num}");
+                CoreLogger.Log($"SearchImagesAsync called with filters: Query='{filters.Query}', Size='{filters.Size}', Color='{filters.Color}', UsageRights='{filters.UsageRights}', Type='{filters.Type}', Time='{filters.Time}', Start={filters.Start}, Num={filters.Num}, MinFileSizeBytes={filters.MinFileSizeBytes}");
                 var url = BuildGoogleCustomSearchUrl(filters, apiKey, cseId);
                 CoreLogger.Log($"Google Custom Search API URL: {url}");
                 using var http = new HttpClient();
@@ -160,6 +160,9 @@ namespace SearchImageDownloader.Core.Services
                             var image = item.GetProperty("image");
                             var thumbnail = image.TryGetProperty("thumbnailLink", out var thumbProp) ? thumbProp.GetString() : null;
                             var context = image.TryGetProperty("contextLink", out var ctxProp) ? ctxProp.GetString() : null;
+                            int? byteSize = image.TryGetProperty("byteSize", out var byteSizeProp) ? byteSizeProp.GetInt32() : (int?)null;
+                            if (filters.MinFileSizeBytes.HasValue && byteSize.HasValue && byteSize.Value < filters.MinFileSizeBytes.Value)
+                                continue; // Skip images below min size
                             results.Add(new ImageResult
                             {
                                 ImageUrl = link,

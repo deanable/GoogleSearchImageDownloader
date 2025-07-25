@@ -24,6 +24,8 @@ namespace SearchImageDownloader.WinForms
         private int pageSize = 10; // Google API max per request
         private int currentStart = 1;
         private HashSet<string> loadedImageUrls = new();
+        // Add a minimum file size filter (in KB) to the UI
+        private int minFileSizeKB = 200; // Default 200KB
 
         public MainForm(IImageSearchService searchService, IImageDownloadService downloadService, IRegistryService registryService)
         {
@@ -46,6 +48,7 @@ namespace SearchImageDownloader.WinForms
             {
                 NativeMethods.SetScrollEvent(lvImages, OnListViewScroll);
             };
+            numMinFileSize.ValueChanged += (s, e) => minFileSizeKB = (int)numMinFileSize.Value;
             // Setup log file
             var logDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
             if (!Directory.Exists(logDir)) Directory.CreateDirectory(logDir);
@@ -125,7 +128,7 @@ namespace SearchImageDownloader.WinForms
             imageListLarge.Images.Clear();
             progressBar.Value = 0;
             lblStatus.Text = "Searching...";
-            Log($"Search started: '{txtSearch.Text}' with filters: Size='{cmbSize.SelectedItem}', Color='{cmbColor.SelectedItem}', UsageRights='{cmbUsageRights.SelectedItem}', Type='{cmbType.SelectedItem}', Time='{cmbTime.SelectedItem}'");
+            Log($"Search started: '{txtSearch.Text}' with filters: Size='{cmbSize.SelectedItem}', Color='{cmbColor.SelectedItem}', UsageRights='{cmbUsageRights.SelectedItem}', Type='{cmbType.SelectedItem}', Time='{cmbTime.SelectedItem}', MinFileSizeKB={minFileSizeKB}");
             try
             {
                 var filters = new SearchFilters
@@ -137,7 +140,8 @@ namespace SearchImageDownloader.WinForms
                     Type = cmbType.SelectedItem?.ToString() ?? "Any type",
                     Time = cmbTime.SelectedItem?.ToString() ?? "Any time",
                     Start = 1,
-                    Num = pageSize
+                    Num = pageSize,
+                    MinFileSizeBytes = minFileSizeKB * 1024
                 };
                 currentStart = 1;
                 allResults.Clear();
