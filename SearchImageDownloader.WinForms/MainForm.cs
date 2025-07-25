@@ -99,8 +99,8 @@ namespace SearchImageDownloader.WinForms
         private void Log(string message)
         {
             var logLine = $"[{DateTime.Now:HH:mm:ss}] {message}\r\n";
-            File.AppendAllText(logFilePath, logLine);
-            AppendLogToUI(logLine);
+            CoreLogger.Log(message); // Centralized logging
+            AppendLogToUI(logLine); // UI only
         }
 
         private void AppendLogToUI(string logLine)
