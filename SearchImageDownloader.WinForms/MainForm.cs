@@ -219,7 +219,7 @@ namespace SearchImageDownloader.WinForms
             try
             {
                 var selectedImages = new List<SearchImageDownloader.Core.Models.ImageResult>();
-                foreach (ListViewItem item in lvImages.CheckedItems)
+                foreach (ListViewItem item in lvImages.SelectedItems)
                 {
                     if (item.Tag is SearchImageDownloader.Core.Models.ImageResult img)
                         selectedImages.Add(img);

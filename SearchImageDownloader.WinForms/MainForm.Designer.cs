@@ -112,14 +112,15 @@ partial class MainForm
         // 
         // lvImages
         // 
-        lvImages.CheckBoxes = true;
+        lvImages.CheckBoxes = false;
         lvImages.Dock = DockStyle.Fill;
         lvImages.LargeImageList = imageListLarge;
         lvImages.Location = new Point(3, 19);
         lvImages.Name = "lvImages";
-        lvImages.Size = new Size(1017, 306);
+        lvImages.Size = new Size(1041, 497);
         lvImages.TabIndex = 10;
         lvImages.UseCompatibleStateImageBehavior = false;
+        lvImages.MultiSelect = true;
         // 
         // imageListLarge
         // 
@@ -129,9 +130,9 @@ partial class MainForm
         // 
         // btnDownload
         // 
-        btnDownload.Location = new Point(857, 14);
+        btnDownload.Location = new Point(857, 22);
         btnDownload.Name = "btnDownload";
-        btnDownload.Size = new Size(80, 63);
+        btnDownload.Size = new Size(155, 23);
         btnDownload.TabIndex = 11;
         btnDownload.Text = "Download Selected";
         // 
@@ -172,9 +173,9 @@ partial class MainForm
         gbFilters.Controls.Add(cmbSize);
         gbFilters.Controls.Add(btnDownload);
         gbFilters.Dock = DockStyle.Top;
-        gbFilters.Location = new Point(12, 12);
+        gbFilters.Location = new Point(0, 0);
         gbFilters.Name = "gbFilters";
-        gbFilters.Size = new Size(830, 64);
+        gbFilters.Size = new Size(1047, 64);
         gbFilters.TabIndex = 12;
         gbFilters.TabStop = false;
         gbFilters.Text = "Search Filters";
@@ -183,9 +184,9 @@ partial class MainForm
         // 
         gbResults.Controls.Add(lvImages);
         gbResults.Dock = DockStyle.Fill;
-        gbResults.Location = new Point(12, 82);
+        gbResults.Location = new Point(0, 64);
         gbResults.Name = "gbResults";
-        gbResults.Size = new Size(1023, 328);
+        gbResults.Size = new Size(1047, 519);
         gbResults.TabIndex = 13;
         gbResults.TabStop = false;
         gbResults.Text = "Results";
@@ -196,9 +197,9 @@ partial class MainForm
         gbStatus.Controls.Add(progressBar);
         gbStatus.Controls.Add(txtLog);
         gbStatus.Dock = DockStyle.Bottom;
-        gbStatus.Location = new Point(12, 416);
+        gbStatus.Location = new Point(0, 428);
         gbStatus.Name = "gbStatus";
-        gbStatus.Size = new Size(1018, 155);
+        gbStatus.Size = new Size(1047, 155);
         gbStatus.TabIndex = 14;
         gbStatus.TabStop = false;
         gbStatus.Text = "Status";
