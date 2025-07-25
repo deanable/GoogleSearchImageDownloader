@@ -23,6 +23,7 @@ namespace SearchImageDownloader.WinForms
         private int totalResults = 0;
         private int pageSize = 10; // Google API max per request
         private int currentStart = 1;
+        private HashSet<string> loadedImageUrls = new();
 
         public MainForm(IImageSearchService searchService, IImageDownloadService downloadService, IRegistryService registryService)
         {
@@ -140,6 +141,7 @@ namespace SearchImageDownloader.WinForms
                 };
                 currentStart = 1;
                 allResults.Clear();
+                loadedImageUrls.Clear();
                 var (results, total) = await Task.Run(() =>
                 {
                     return ((GoogleImageSearchService)_searchService).SearchImagesWithTotal(filters);
@@ -200,8 +202,9 @@ namespace SearchImageDownloader.WinForms
             {
                 return ((GoogleImageSearchService)_searchService).SearchImagesWithTotal(filters);
             });
-            allResults.AddRange(results);
-            await Task.Run(() => LoadNextPageThreaded());
+            var newResults = results.Where(r => r.ImageUrl != null && loadedImageUrls.Add(r.ImageUrl)).ToList();
+            allResults.AddRange(newResults);
+            await Task.Run(() => LoadNextPageThreaded(newResults));
         }
 
         // Remove all references to btnLoadMore and related logic
@@ -309,22 +312,31 @@ namespace SearchImageDownloader.WinForms
             }
         }
 
-        private void LoadNextPageThreaded()
+        private void LoadNextPageThreaded(List<SearchImageDownloader.Core.Models.ImageResult>? newResults = null)
         {
-            int start = currentPage * pageSize;
-            int end = Math.Min(start + pageSize, allResults.Count);
-            Log($"Loading images {start + 1}-{end} of {totalResults}");
+            List<SearchImageDownloader.Core.Models.ImageResult> toLoad;
+            if (newResults != null)
+            {
+                toLoad = newResults;
+            }
+            else
+            {
+                int start = currentPage * pageSize;
+                int end = Math.Min(start + pageSize, allResults.Count);
+                toLoad = allResults.Skip(start).Take(end - start).ToList();
+            }
+            Log($"Loading {toLoad.Count} images.");
             Invoke(new Action(() =>
             {
                 progressBar.Value = 0;
-                progressBar.Maximum = end - start;
-                lblStatus.Text = $"Loading images {start + 1}-{end} of {totalResults}";
+                progressBar.Maximum = toLoad.Count;
+                lblStatus.Text = $"Loading images {allResults.Count - toLoad.Count + 1}-{allResults.Count} of {totalResults}";
             }));
             using (var http = new System.Net.Http.HttpClient())
             {
-                for (int i = start; i < end; i++)
+                int idx = allResults.Count - toLoad.Count;
+                foreach (var img in toLoad)
                 {
-                    var img = allResults[i];
                     System.Drawing.Image? thumb = null;
                     try
                     {
@@ -342,32 +354,33 @@ namespace SearchImageDownloader.WinForms
                     }
                     catch (Exception ex)
                     {
-                        Log($"Thumbnail load error for image {i + 1}: {ex.Message}\n{ex.StackTrace}");
+                        Log($"Thumbnail load error for image {idx + 1}: {ex.Message}\n{ex.StackTrace}");
                         thumb = null;
                     }
-                    int idx = i;
+                    int itemIdx = idx;
                     Invoke(new Action(() =>
                     {
                         if (thumb != null)
                         {
-                            imageListLarge.Images.Add(idx.ToString(), thumb);
+                            imageListLarge.Images.Add(itemIdx.ToString(), thumb);
                         }
                         var item = new ListViewItem(img.Title ?? "Image")
                         {
-                            ImageIndex = thumb != null ? idx : -1,
+                            ImageIndex = thumb != null ? itemIdx : -1,
                             Tag = img
                         };
                         lvImages.Items.Add(item);
-                        progressBar.Value = idx - start + 1;
+                        int progress = Math.Min(progressBar.Maximum, Math.Max(progressBar.Minimum, itemIdx - (allResults.Count - toLoad.Count) + 1));
+                        progressBar.Value = progress;
                     }));
+                    idx++;
                 }
             }
             currentPage++;
             Invoke(new Action(() =>
             {
-                // Remove all references to btnLoadMore and related logic
-                lblStatus.Text = $"All {totalResults} images loaded.";
-                Log($"Loaded images {start + 1}-{end}.");
+                lblStatus.Text = $"All {allResults.Count} of {totalResults} images loaded.";
+                Log($"Loaded images {allResults.Count - toLoad.Count + 1}-{allResults.Count}.");
             }));
         }
     }
