@@ -8,32 +8,70 @@ using HtmlAgilityPack;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace SearchImageDownloader.Core.Services
 {
     public static class CoreLogger
     {
         private static string? logFilePath;
+        private static readonly BlockingCollection<string> logQueue = new();
+        private static Thread? logThread;
+        private static bool isRunning = false;
+
         public static void Init(string path)
         {
             logFilePath = path;
             File.AppendAllText(logFilePath, $"[CoreLogger] Initialized at {DateTime.Now}\r\n");
+            if (!isRunning)
+            {
+                isRunning = true;
+                logThread = new Thread(ProcessLogQueue) { IsBackground = true };
+                logThread.Start();
+            }
         }
+
         public static void Log(string message)
         {
             if (logFilePath == null) return;
             try
             {
-                File.AppendAllText(logFilePath, $"[{DateTime.Now:HH:mm:ss}] [Core] {message}\r\n");
-            }
-            catch (IOException)
-            {
-                // Log file is in use by another process; skip this log entry.
+                logQueue.Add($"[{DateTime.Now:HH:mm:ss}] [Core] {message}\r\n");
             }
             catch (Exception)
             {
-                // Ignore all other logging errors to avoid crashing the app.
+                // Ignore logging errors
             }
+        }
+
+        private static void ProcessLogQueue()
+        {
+            while (isRunning)
+            {
+                try
+                {
+                    var entry = logQueue.Take();
+                    if (logFilePath != null)
+                        File.AppendAllText(logFilePath, entry);
+                }
+                catch (InvalidOperationException)
+                {
+                    // logQueue was completed
+                    break;
+                }
+                catch (Exception)
+                {
+                    // Ignore file write errors
+                }
+            }
+        }
+
+        public static void Shutdown()
+        {
+            isRunning = false;
+            logQueue.CompleteAdding();
+            logThread?.Join();
         }
     }
 
