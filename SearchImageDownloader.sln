@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchImageDownloader.Core", "SearchImageDownloader.Core\SearchImageDownloader.Core.csproj", "{4FD51267-E6B8-4338-A069-6C6C2EAD4B28}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SearchImageDownloader.WinForms", "SearchImageDownloader.WinForms", "{965E5E2C-AF0C-77B8-D36E-FF654EEF97D0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleImageDownloader.WinForms", "SearchImageDownloader.WinForms\GoogleImageDownloader.WinForms.csproj", "{AC03DE9D-41DB-4914-9610-EE87DF95A2CA}"
 EndProject
 Global
@@ -46,8 +44,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{AC03DE9D-41DB-4914-9610-EE87DF95A2CA} = {965E5E2C-AF0C-77B8-D36E-FF654EEF97D0}
 	EndGlobalSection
 EndGlobal

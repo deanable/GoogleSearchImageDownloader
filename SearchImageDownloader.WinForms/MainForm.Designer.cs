@@ -28,129 +28,181 @@ partial class MainForm
     /// </summary>
     private void InitializeComponent()
     {
-        this.components = new System.ComponentModel.Container();
-        this.txtSearch = new System.Windows.Forms.TextBox();
-        this.btnSearch = new System.Windows.Forms.Button();
-        this.cmbSize = new System.Windows.Forms.ComboBox();
-        this.cmbColor = new System.Windows.Forms.ComboBox();
-        this.cmbUsageRights = new System.Windows.Forms.ComboBox();
-        this.cmbType = new System.Windows.Forms.ComboBox();
-        this.cmbTime = new System.Windows.Forms.ComboBox();
-        this.lvImages = new System.Windows.Forms.ListView();
-        this.btnDownload = new System.Windows.Forms.Button();
-        this.imageListLarge = new System.Windows.Forms.ImageList(this.components);
-        this.progressBar = new System.Windows.Forms.ProgressBar();
-        this.lblStatus = new System.Windows.Forms.Label();
-        this.txtLog = new System.Windows.Forms.TextBox();
-        this.SuspendLayout();
+        components = new System.ComponentModel.Container();
+        txtSearch = new TextBox();
+        btnSearch = new Button();
+        cmbSize = new ComboBox();
+        cmbColor = new ComboBox();
+        cmbUsageRights = new ComboBox();
+        cmbType = new ComboBox();
+        cmbTime = new ComboBox();
+        lvImages = new ListView();
+        imageListLarge = new ImageList(components);
+        btnDownload = new Button();
+        progressBar = new ProgressBar();
+        lblStatus = new Label();
+        txtLog = new TextBox();
+        groupBox1 = new GroupBox();
+        groupBox2 = new GroupBox();
+        groupBox1.SuspendLayout();
+        groupBox2.SuspendLayout();
+        SuspendLayout();
         // 
         // txtSearch
         // 
-        this.txtSearch.Location = new System.Drawing.Point(12, 12);
-        this.txtSearch.Size = new System.Drawing.Size(250, 23);
+        txtSearch.Location = new Point(6, 22);
+        txtSearch.Name = "txtSearch";
+        txtSearch.Size = new Size(250, 23);
+        txtSearch.TabIndex = 3;
         // 
         // btnSearch
         // 
-        this.btnSearch.Location = new System.Drawing.Point(270, 12);
-        this.btnSearch.Size = new System.Drawing.Size(75, 23);
-        this.btnSearch.Text = "Search";
+        btnSearch.Location = new Point(264, 22);
+        btnSearch.Name = "btnSearch";
+        btnSearch.Size = new Size(75, 23);
+        btnSearch.TabIndex = 4;
+        btnSearch.Text = "Search";
         // 
         // cmbSize
         // 
-        this.cmbSize.Location = new System.Drawing.Point(360, 12);
-        this.cmbSize.Size = new System.Drawing.Size(80, 23);
-        this.cmbSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-        this.cmbSize.Items.AddRange(new object[] {"Any size", "Large", "Medium", "Icon"});
+        cmbSize.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbSize.Items.AddRange(new object[] { "Any size", "Large", "Medium", "Icon" });
+        cmbSize.Location = new Point(354, 22);
+        cmbSize.Name = "cmbSize";
+        cmbSize.Size = new Size(80, 23);
+        cmbSize.TabIndex = 5;
         // 
         // cmbColor
         // 
-        this.cmbColor.Location = new System.Drawing.Point(450, 12);
-        this.cmbColor.Size = new System.Drawing.Size(80, 23);
-        this.cmbColor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-        this.cmbColor.Items.AddRange(new object[] {"Any color", "Color", "Black and white", "Transparent"});
+        cmbColor.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbColor.Items.AddRange(new object[] { "Any color", "Color", "Black and white", "Transparent" });
+        cmbColor.Location = new Point(444, 22);
+        cmbColor.Name = "cmbColor";
+        cmbColor.Size = new Size(80, 23);
+        cmbColor.TabIndex = 6;
         // 
         // cmbUsageRights
         // 
-        this.cmbUsageRights.Location = new System.Drawing.Point(540, 12);
-        this.cmbUsageRights.Size = new System.Drawing.Size(100, 23);
-        this.cmbUsageRights.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-        this.cmbUsageRights.Items.AddRange(new object[] {"Any rights", "Labeled for reuse"});
+        cmbUsageRights.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbUsageRights.Items.AddRange(new object[] { "Any rights", "Labeled for reuse" });
+        cmbUsageRights.Location = new Point(534, 22);
+        cmbUsageRights.Name = "cmbUsageRights";
+        cmbUsageRights.Size = new Size(100, 23);
+        cmbUsageRights.TabIndex = 7;
         // 
         // cmbType
         // 
-        this.cmbType.Location = new System.Drawing.Point(650, 12);
-        this.cmbType.Size = new System.Drawing.Size(80, 23);
-        this.cmbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-        this.cmbType.Items.AddRange(new object[] {"Any type", "Photo", "Clipart", "Lineart"});
+        cmbType.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbType.Items.AddRange(new object[] { "Any type", "Photo", "Clipart", "Lineart" });
+        cmbType.Location = new Point(644, 22);
+        cmbType.Name = "cmbType";
+        cmbType.Size = new Size(80, 23);
+        cmbType.TabIndex = 8;
         // 
         // cmbTime
         // 
-        this.cmbTime.Location = new System.Drawing.Point(740, 12);
-        this.cmbTime.Size = new System.Drawing.Size(80, 23);
-        this.cmbTime.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-        this.cmbTime.Items.AddRange(new object[] {"Any time", "Past 24 hours", "Past week"});
+        cmbTime.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbTime.Items.AddRange(new object[] { "Any time", "Past 24 hours", "Past week" });
+        cmbTime.Location = new Point(734, 22);
+        cmbTime.Name = "cmbTime";
+        cmbTime.Size = new Size(80, 23);
+        cmbTime.TabIndex = 9;
         // 
         // lvImages
         // 
-        this.lvImages.Location = new System.Drawing.Point(12, 50);
-        this.lvImages.Size = new System.Drawing.Size(760, 330);
-        this.lvImages.View = System.Windows.Forms.View.LargeIcon;
-        this.lvImages.CheckBoxes = true;
-        this.lvImages.LargeImageList = this.imageListLarge;
-        // 
-        // btnDownload
-        // 
-        this.btnDownload.Location = new System.Drawing.Point(12, 440);
-        this.btnDownload.Size = new System.Drawing.Size(120, 30);
-        this.btnDownload.Text = "Download Selected";
+        lvImages.CheckBoxes = true;
+        lvImages.Dock = DockStyle.Fill;
+        lvImages.LargeImageList = imageListLarge;
+        lvImages.Location = new Point(3, 19);
+        lvImages.Name = "lvImages";
+        lvImages.Size = new Size(1017, 306);
+        lvImages.TabIndex = 10;
+        lvImages.UseCompatibleStateImageBehavior = false;
         // 
         // imageListLarge
         // 
-        this.imageListLarge.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-        this.imageListLarge.ImageSize = new System.Drawing.Size(128, 128);
+        imageListLarge.ColorDepth = ColorDepth.Depth32Bit;
+        imageListLarge.ImageSize = new Size(128, 128);
+        imageListLarge.TransparentColor = Color.Transparent;
+        // 
+        // btnDownload
+        // 
+        btnDownload.Location = new Point(12, 516);
+        btnDownload.Name = "btnDownload";
+        btnDownload.Size = new Size(214, 30);
+        btnDownload.TabIndex = 11;
+        btnDownload.Text = "Download Selected";
         // 
         // progressBar
         // 
-        this.progressBar.Location = new System.Drawing.Point(12, 390);
-        this.progressBar.Size = new System.Drawing.Size(760, 20);
-        this.progressBar.Minimum = 0;
-        this.progressBar.Maximum = 100;
-        this.progressBar.Value = 0;
+        progressBar.Location = new Point(18, 552);
+        progressBar.Name = "progressBar";
+        progressBar.Size = new Size(1020, 20);
+        progressBar.TabIndex = 1;
         // 
         // lblStatus
         // 
-        this.lblStatus.Location = new System.Drawing.Point(12, 415);
-        this.lblStatus.Size = new System.Drawing.Size(760, 20);
-        this.lblStatus.Text = "Ready";
+        lblStatus.Location = new Point(12, 415);
+        lblStatus.Name = "lblStatus";
+        lblStatus.Size = new Size(214, 98);
+        lblStatus.TabIndex = 2;
+        lblStatus.Text = "Ready";
         // 
         // txtLog
         // 
-        this.txtLog.Location = new System.Drawing.Point(12, 480);
-        this.txtLog.Size = new System.Drawing.Size(800, 100);
-        this.txtLog.Multiline = true;
-        this.txtLog.ReadOnly = true;
-        this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-        this.txtLog.WordWrap = false;
+        txtLog.Location = new Point(232, 416);
+        txtLog.Multiline = true;
+        txtLog.Name = "txtLog";
+        txtLog.ReadOnly = true;
+        txtLog.ScrollBars = ScrollBars.Vertical;
+        txtLog.Size = new Size(800, 130);
+        txtLog.TabIndex = 0;
+        txtLog.WordWrap = false;
         // 
-        // Form1
+        // groupBox1
         // 
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(840, 600);
-        this.Controls.Add(this.txtLog);
-        this.Controls.Add(this.progressBar);
-        this.Controls.Add(this.lblStatus);
-        this.Controls.Add(this.txtSearch);
-        this.Controls.Add(this.btnSearch);
-        this.Controls.Add(this.cmbSize);
-        this.Controls.Add(this.cmbColor);
-        this.Controls.Add(this.cmbUsageRights);
-        this.Controls.Add(this.cmbType);
-        this.Controls.Add(this.cmbTime);
-        this.Controls.Add(this.lvImages);
-        this.Controls.Add(this.btnDownload);
-        this.Text = "Google Image Downloader";
-        this.ResumeLayout(false);
-        this.PerformLayout();
+        groupBox1.Controls.Add(txtSearch);
+        groupBox1.Controls.Add(cmbTime);
+        groupBox1.Controls.Add(cmbType);
+        groupBox1.Controls.Add(cmbUsageRights);
+        groupBox1.Controls.Add(cmbColor);
+        groupBox1.Controls.Add(btnSearch);
+        groupBox1.Controls.Add(cmbSize);
+        groupBox1.Location = new Point(12, 12);
+        groupBox1.Name = "groupBox1";
+        groupBox1.Size = new Size(830, 64);
+        groupBox1.TabIndex = 12;
+        groupBox1.TabStop = false;
+        groupBox1.Text = "Search Filters";
+        // 
+        // groupBox2
+        // 
+        groupBox2.Controls.Add(lvImages);
+        groupBox2.Location = new Point(12, 82);
+        groupBox2.Name = "groupBox2";
+        groupBox2.Size = new Size(1023, 328);
+        groupBox2.TabIndex = 13;
+        groupBox2.TabStop = false;
+        groupBox2.Text = "Results";
+        // 
+        // MainForm
+        // 
+        AutoScaleDimensions = new SizeF(7F, 15F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(1047, 583);
+        Controls.Add(groupBox2);
+        Controls.Add(groupBox1);
+        Controls.Add(txtLog);
+        Controls.Add(progressBar);
+        Controls.Add(lblStatus);
+        Controls.Add(btnDownload);
+        Name = "MainForm";
+        Text = "Google Image Downloader";
+        groupBox1.ResumeLayout(false);
+        groupBox1.PerformLayout();
+        groupBox2.ResumeLayout(false);
+        ResumeLayout(false);
+        PerformLayout();
     }
 
     #endregion
@@ -168,4 +220,6 @@ partial class MainForm
     private System.Windows.Forms.ProgressBar progressBar;
     private System.Windows.Forms.Label lblStatus;
     private System.Windows.Forms.TextBox txtLog;
+    private GroupBox groupBox1;
+    private GroupBox groupBox2;
 }

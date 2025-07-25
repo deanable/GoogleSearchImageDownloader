@@ -47,35 +47,52 @@ namespace SearchImageDownloader.Core.Services
             var results = new List<ImageResult>();
             try
             {
+                CoreLogger.Log($"SearchImagesAsync called with filters: Query='{filters.Query}', Size='{filters.Size}', Color='{filters.Color}', UsageRights='{filters.UsageRights}', Type='{filters.Type}', Time='{filters.Time}'");
                 var url = BuildGoogleCustomSearchUrl(filters, apiKey, cseId);
                 CoreLogger.Log($"Google Custom Search API URL: {url}");
                 using var http = new HttpClient();
                 var response = await http.GetAsync(url);
+                CoreLogger.Log($"HTTP status: {(int)response.StatusCode} {response.ReasonPhrase}");
+                var json = await response.Content.ReadAsStringAsync();
+                CoreLogger.Log($"JSON response (first 2048 chars):\n{json.Substring(0, Math.Min(2048, json.Length))}");
                 if (!response.IsSuccessStatusCode)
                 {
                     CoreLogger.Log($"Google API error: {response.StatusCode} {response.ReasonPhrase}");
+                    if (json.Contains("dailyLimitExceeded") || json.Contains("quotaExceeded"))
+                        CoreLogger.Log("Google API quota exceeded or daily limit reached.");
+                    if (json.Contains("keyInvalid") || json.Contains("invalid"))
+                        CoreLogger.Log("Google API key or CSE ID invalid.");
                     return results;
                 }
-                var json = await response.Content.ReadAsStringAsync();
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
                 if (root.TryGetProperty("items", out var items))
                 {
+                    int count = 0;
                     foreach (var item in items.EnumerateArray())
                     {
-                        var link = item.GetProperty("link").GetString();
-                        var title = item.GetProperty("title").GetString();
-                        var image = item.GetProperty("image");
-                        var thumbnail = image.TryGetProperty("thumbnailLink", out var thumbProp) ? thumbProp.GetString() : null;
-                        var context = image.TryGetProperty("contextLink", out var ctxProp) ? ctxProp.GetString() : null;
-                        results.Add(new ImageResult
+                        try
                         {
-                            ImageUrl = link,
-                            ThumbnailUrl = thumbnail,
-                            Title = title,
-                            SourcePage = context
-                        });
+                            var link = item.GetProperty("link").GetString();
+                            var title = item.GetProperty("title").GetString();
+                            var image = item.GetProperty("image");
+                            var thumbnail = image.TryGetProperty("thumbnailLink", out var thumbProp) ? thumbProp.GetString() : null;
+                            var context = image.TryGetProperty("contextLink", out var ctxProp) ? ctxProp.GetString() : null;
+                            results.Add(new ImageResult
+                            {
+                                ImageUrl = link,
+                                ThumbnailUrl = thumbnail,
+                                Title = title,
+                                SourcePage = context
+                            });
+                            count++;
+                        }
+                        catch (Exception ex)
+                        {
+                            CoreLogger.Log($"Error parsing item: {ex.Message}\n{ex.StackTrace}");
+                        }
                     }
+                    CoreLogger.Log($"Parsed {count} image results from API response.");
                 }
                 else
                 {

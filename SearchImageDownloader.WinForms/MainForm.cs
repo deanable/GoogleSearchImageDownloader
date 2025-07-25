@@ -98,6 +98,21 @@ namespace SearchImageDownloader.WinForms
         {
             var logLine = $"[{DateTime.Now:HH:mm:ss}] {message}\r\n";
             File.AppendAllText(logFilePath, logLine);
+            AppendLogToUI(logLine);
+        }
+
+        private void AppendLogToUI(string logLine)
+        {
+            if (txtLog.InvokeRequired)
+            {
+                txtLog.Invoke(new Action(() => AppendLogToUI(logLine)));
+            }
+            else
+            {
+                txtLog.AppendText(logLine);
+                txtLog.SelectionStart = txtLog.Text.Length;
+                txtLog.ScrollToCaret();
+            }
         }
 
         private async void btnSearch_Click(object? sender, EventArgs e)
@@ -108,7 +123,7 @@ namespace SearchImageDownloader.WinForms
             imageListLarge.Images.Clear();
             progressBar.Value = 0;
             lblStatus.Text = "Searching...";
-            Log($"Search started: '{txtSearch.Text}'");
+            Log($"Search started: '{txtSearch.Text}' with filters: Size='{cmbSize.SelectedItem}', Color='{cmbColor.SelectedItem}', UsageRights='{cmbUsageRights.SelectedItem}', Type='{cmbType.SelectedItem}', Time='{cmbTime.SelectedItem}'");
             try
             {
                 var filters = new SearchFilters
@@ -124,18 +139,18 @@ namespace SearchImageDownloader.WinForms
                 {
                     allResults = _searchService.SearchImages(filters).ToList();
                 });
+                Log($"Search completed. Results found: {allResults.Count}");
                 currentPage = 0;
                 progressBar.Maximum = Math.Min(PageSize, allResults.Count);
                 progressBar.Value = 0;
                 lblStatus.Text = $"Found {allResults.Count} images. Loading first {Math.Min(PageSize, allResults.Count)}...";
-                Log($"Found {allResults.Count} images.");
                 await Task.Run(() => LoadNextPageThreaded());
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"An error occurred during search:\n{ex.Message}", "Search Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 lblStatus.Text = "Error during search.";
-                Log($"Search error: {ex.Message}");
+                Log($"Search error: {ex.Message}\n{ex.StackTrace}");
             }
             finally
             {
@@ -144,10 +159,27 @@ namespace SearchImageDownloader.WinForms
             }
         }
 
+        private static System.Drawing.Image CreateThumbnailWithAspect(System.Drawing.Image original, int thumbSize)
+        {
+            int w = original.Width, h = original.Height;
+            float ratio = Math.Min((float)thumbSize / w, (float)thumbSize / h);
+            int newW = (int)(w * ratio), newH = (int)(h * ratio);
+            var bmp = new System.Drawing.Bitmap(thumbSize, thumbSize);
+            using (var g = System.Drawing.Graphics.FromImage(bmp))
+            {
+                g.Clear(System.Drawing.Color.White);
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                int x = (thumbSize - newW) / 2, y = (thumbSize - newH) / 2;
+                g.DrawImage(original, x, y, newW, newH);
+            }
+            return bmp;
+        }
+
         private void LoadNextPageThreaded()
         {
             int start = currentPage * PageSize;
             int end = Math.Min(start + PageSize, allResults.Count);
+            Log($"Loading images {start + 1}-{end} of {allResults.Count}");
             Invoke(new Action(() =>
             {
                 progressBar.Value = 0;
@@ -167,13 +199,16 @@ namespace SearchImageDownloader.WinForms
                             var data = http.GetByteArrayAsync(img.ThumbnailUrl).Result;
                             using (var ms = new System.IO.MemoryStream(data))
                             {
-                                thumb = System.Drawing.Image.FromStream(ms);
+                                using (var original = System.Drawing.Image.FromStream(ms))
+                                {
+                                    thumb = CreateThumbnailWithAspect(original, 128);
+                                }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        Log($"Thumbnail load error for image {i + 1}: {ex.Message}");
+                        Log($"Thumbnail load error for image {i + 1}: {ex.Message}\n{ex.StackTrace}");
                         thumb = null;
                     }
                     int idx = i;
@@ -204,7 +239,15 @@ namespace SearchImageDownloader.WinForms
 
         private void BtnLoadMore_Click(object? sender, EventArgs e)
         {
-            Task.Run(() => LoadNextPageThreaded());
+            Log("Load More button clicked.");
+            try
+            {
+                LoadNextPageThreaded();
+            }
+            catch (Exception ex)
+            {
+                Log($"Exception in LoadNextPageThreaded: {ex.Message}\n{ex.StackTrace}");
+            }
         }
 
         private async void btnDownload_Click(object? sender, EventArgs e)
@@ -222,6 +265,7 @@ namespace SearchImageDownloader.WinForms
                     if (item.Tag is SearchImageDownloader.Core.Models.ImageResult img)
                         selectedImages.Add(img);
                 }
+                Log($"Download requested for {selectedImages.Count} images.");
                 if (selectedImages.Count == 0)
                 {
                     MessageBox.Show("Please select images to download.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -252,12 +296,30 @@ namespace SearchImageDownloader.WinForms
             {
                 MessageBox.Show($"An error occurred during download:\n{ex.Message}", "Download Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 lblStatus.Text = "Error during download.";
-                Log($"Download error: {ex.Message}");
+                Log($"Download error: {ex.Message}\n{ex.StackTrace}");
             }
             finally
             {
                 btnSearch.Enabled = true;
                 btnDownload.Enabled = true;
+            }
+        }
+
+        // Add WndProc override for infinite scrolling
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+            const int WM_VSCROLL = 0x0115;
+            if (m.Msg == WM_VSCROLL && lvImages.Focused)
+            {
+                if (lvImages.Items.Count > 0 && lvImages.TopItem != null)
+                {
+                    int lastVisible = lvImages.TopItem.Index + lvImages.ClientSize.Height / lvImages.TopItem.Bounds.Height;
+                    if (lastVisible >= lvImages.Items.Count - 5 && btnLoadMore.Visible)
+                    {
+                        BtnLoadMore_Click(null, EventArgs.Empty);
+                    }
+                }
             }
         }
     }
