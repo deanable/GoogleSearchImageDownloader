@@ -22,7 +22,18 @@ namespace SearchImageDownloader.Core.Services
         public static void Log(string message)
         {
             if (logFilePath == null) return;
-            File.AppendAllText(logFilePath, $"[{DateTime.Now:HH:mm:ss}] [Core] {message}\r\n");
+            try
+            {
+                File.AppendAllText(logFilePath, $"[{DateTime.Now:HH:mm:ss}] [Core] {message}\r\n");
+            }
+            catch (IOException)
+            {
+                // Log file is in use by another process; skip this log entry.
+            }
+            catch (Exception)
+            {
+                // Ignore all other logging errors to avoid crashing the app.
+            }
         }
     }
 
