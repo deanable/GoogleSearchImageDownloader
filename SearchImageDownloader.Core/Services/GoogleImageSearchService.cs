@@ -197,8 +197,16 @@ namespace SearchImageDownloader.Core.Services
             url += $"&num={filters.Num}&start={filters.Start}";
             if (!string.IsNullOrEmpty(filters.Size) && filters.Size != "Any size")
             {
-                // Google API: imgSize=icon|medium|large|xlarge|xxlarge|huge
-                var sizeMap = new Dictionary<string, string> { { "Icon", "icon" }, { "Medium", "medium" }, { "Large", "large" }, { "X-Large", "xlarge" }, { "XX-Large", "xxlarge" }, { "Huge", "huge" } };
+                // Google API: imgSize=icon|small|medium|large|xlarge|xxlarge|huge
+                var sizeMap = new Dictionary<string, string> {
+                    { "Icon", "icon" },
+                    { "Small", "small" },
+                    { "Medium", "medium" },
+                    { "Large", "large" },
+                    { "X-Large", "xlarge" },
+                    { "XX-Large", "xxlarge" },
+                    { "Huge", "huge" }
+                };
                 if (sizeMap.TryGetValue(filters.Size, out var apiSize))
                     url += $"&imgSize={apiSize}";
             }

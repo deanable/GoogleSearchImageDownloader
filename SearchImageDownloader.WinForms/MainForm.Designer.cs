@@ -68,7 +68,8 @@ partial class MainForm
         // cmbSize
         // 
         cmbSize.DropDownStyle = ComboBoxStyle.DropDownList;
-        cmbSize.Items.AddRange(new object[] { "Any size", "Large", "Medium", "Icon" });
+        cmbSize.Items.Clear();
+        cmbSize.Items.AddRange(new object[] { "Any size", "Icon", "Small", "Medium", "Large", "X-Large", "XX-Large", "Huge" });
         cmbSize.Location = new Point(354, 22);
         cmbSize.Name = "cmbSize";
         cmbSize.Size = new Size(80, 23);
@@ -179,6 +180,26 @@ partial class MainForm
         gbFilters.TabIndex = 12;
         gbFilters.TabStop = false;
         gbFilters.Text = "Search Filters";
+        // Instantiate controls
+        numMinFileSize = new NumericUpDown();
+        lblMinFileSize = new Label();
+        // lblMinFileSize
+        lblMinFileSize.Location = new Point(860, 22);
+        lblMinFileSize.Size = new Size(90, 23);
+        lblMinFileSize.Text = "Min Size (KB):";
+        lblMinFileSize.TextAlign = ContentAlignment.MiddleRight;
+        lblMinFileSize.Name = "lblMinFileSize";
+        // numMinFileSize
+        numMinFileSize.Location = new Point(950, 22);
+        numMinFileSize.Minimum = 0;
+        numMinFileSize.Maximum = 10000;
+        numMinFileSize.Value = 200;
+        numMinFileSize.Size = new Size(70, 23);
+        numMinFileSize.Name = "numMinFileSize";
+        numMinFileSize.TabIndex = 12;
+        // Add to group box
+        gbFilters.Controls.Add(lblMinFileSize);
+        gbFilters.Controls.Add(numMinFileSize);
         // 
         // gbResults
         // 
