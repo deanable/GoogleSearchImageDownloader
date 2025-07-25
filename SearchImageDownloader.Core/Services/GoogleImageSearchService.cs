@@ -53,7 +53,27 @@ namespace SearchImageDownloader.Core.Services
                 {
                     var entry = logQueue.Take();
                     if (logFilePath != null)
-                        File.AppendAllText(logFilePath, entry);
+                    {
+                        bool written = false;
+                        int retries = 5;
+                        while (!written && retries-- > 0)
+                        {
+                            try
+                            {
+                                using (var fs = new FileStream(logFilePath, FileMode.Append, FileAccess.Write, FileShare.Write))
+                                using (var sw = new StreamWriter(fs))
+                                {
+                                    sw.Write(entry);
+                                }
+                                written = true;
+                            }
+                            catch (IOException)
+                            {
+                                Thread.Sleep(50); // Wait and retry if file is locked
+                            }
+                        }
+                        // If not written after retries, skip this entry
+                    }
                 }
                 catch (InvalidOperationException)
                 {
