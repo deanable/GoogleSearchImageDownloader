@@ -170,6 +170,7 @@ partial class MainForm
         gbFilters.Controls.Add(cmbColor);
         gbFilters.Controls.Add(btnSearch);
         gbFilters.Controls.Add(cmbSize);
+        gbFilters.Controls.Add(btnDownload);
         gbFilters.Dock = DockStyle.Top;
         gbFilters.Location = new Point(12, 12);
         gbFilters.Name = "gbFilters";
@@ -210,7 +211,6 @@ partial class MainForm
         Controls.Add(gbStatus);
         Controls.Add(gbResults);
         Controls.Add(gbFilters);
-        Controls.Add(btnDownload);
         Name = "MainForm";
         Text = "Google Image Downloader";
         gbFilters.ResumeLayout(false);
