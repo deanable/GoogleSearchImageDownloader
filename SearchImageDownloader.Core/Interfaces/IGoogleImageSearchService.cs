@@ -6,5 +6,6 @@ namespace SearchImageDownloader.Core.Interfaces
     public interface IImageSearchService
     {
         IEnumerable<SearchImageDownloader.Core.Models.ImageResult> SearchImages(SearchImageDownloader.Core.Models.SearchFilters filters);
+        (IEnumerable<ImageResult> Results, int TotalResults) SearchImagesWithTotal(SearchFilters filters);
     }
 } 

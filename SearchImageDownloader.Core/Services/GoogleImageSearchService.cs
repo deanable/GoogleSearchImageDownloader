@@ -39,15 +39,24 @@ namespace SearchImageDownloader.Core.Services
             var (apiKey, cseId) = _registryService.LoadGoogleApiCredentials();
             if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(cseId))
                 throw new InvalidOperationException("Google API Key or CSE ID is not set in the registry.");
+            return SearchImagesAsync(filters, apiKey, cseId).GetAwaiter().GetResult().Results;
+        }
+
+        public (IEnumerable<ImageResult> Results, int TotalResults) SearchImagesWithTotal(SearchFilters filters)
+        {
+            var (apiKey, cseId) = _registryService.LoadGoogleApiCredentials();
+            if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(cseId))
+                throw new InvalidOperationException("Google API Key or CSE ID is not set in the registry.");
             return SearchImagesAsync(filters, apiKey, cseId).GetAwaiter().GetResult();
         }
 
-        private async Task<IEnumerable<ImageResult>> SearchImagesAsync(SearchFilters filters, string apiKey, string cseId)
+        private async Task<(IEnumerable<ImageResult> Results, int TotalResults)> SearchImagesAsync(SearchFilters filters, string apiKey, string cseId)
         {
             var results = new List<ImageResult>();
+            int totalResults = 0;
             try
             {
-                CoreLogger.Log($"SearchImagesAsync called with filters: Query='{filters.Query}', Size='{filters.Size}', Color='{filters.Color}', UsageRights='{filters.UsageRights}', Type='{filters.Type}', Time='{filters.Time}'");
+                CoreLogger.Log($"SearchImagesAsync called with filters: Query='{filters.Query}', Size='{filters.Size}', Color='{filters.Color}', UsageRights='{filters.UsageRights}', Type='{filters.Type}', Time='{filters.Time}', Start={filters.Start}, Num={filters.Num}");
                 var url = BuildGoogleCustomSearchUrl(filters, apiKey, cseId);
                 CoreLogger.Log($"Google Custom Search API URL: {url}");
                 using var http = new HttpClient();
@@ -62,10 +71,14 @@ namespace SearchImageDownloader.Core.Services
                         CoreLogger.Log("Google API quota exceeded or daily limit reached.");
                     if (json.Contains("keyInvalid") || json.Contains("invalid"))
                         CoreLogger.Log("Google API key or CSE ID invalid.");
-                    return results;
+                    return (results, 0);
                 }
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
+                if (root.TryGetProperty("searchInformation", out var info) && info.TryGetProperty("totalResults", out var total))
+                {
+                    int.TryParse(total.GetString(), out totalResults);
+                }
                 if (root.TryGetProperty("items", out var items))
                 {
                     int count = 0;
@@ -103,12 +116,13 @@ namespace SearchImageDownloader.Core.Services
             {
                 CoreLogger.Log($"Exception in SearchImagesAsync: {ex.Message}\n{ex.StackTrace}");
             }
-            return results;
+            return (results, totalResults);
         }
 
         private string BuildGoogleCustomSearchUrl(SearchFilters filters, string apiKey, string cseId)
         {
             var url = $"https://www.googleapis.com/customsearch/v1?key={apiKey}&cx={cseId}&searchType=image&q={Uri.EscapeDataString(filters.Query ?? "")}";
+            url += $"&num={filters.Num}&start={filters.Start}";
             if (!string.IsNullOrEmpty(filters.Size) && filters.Size != "Any size")
             {
                 // Google API: imgSize=icon|medium|large|xlarge|xxlarge|huge
