@@ -161,8 +161,8 @@ namespace SearchImageDownloader.Core.Services
                             var thumbnail = image.TryGetProperty("thumbnailLink", out var thumbProp) ? thumbProp.GetString() : null;
                             var context = image.TryGetProperty("contextLink", out var ctxProp) ? ctxProp.GetString() : null;
                             int? byteSize = image.TryGetProperty("byteSize", out var byteSizeProp) ? byteSizeProp.GetInt32() : (int?)null;
-                            if (filters.MinFileSizeBytes.HasValue && byteSize.HasValue && byteSize.Value < filters.MinFileSizeBytes.Value)
-                                continue; // Skip images below min size
+                            if (filters.MinFileSizeBytes.HasValue && (!byteSize.HasValue || byteSize.Value < filters.MinFileSizeBytes.Value))
+                                continue; // Skip images below min size or with unknown size
                             results.Add(new ImageResult
                             {
                                 ImageUrl = link,

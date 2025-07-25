@@ -43,9 +43,12 @@ partial class MainForm
         lblStatus = new Label();
         txtLog = new TextBox();
         gbFilters = new GroupBox();
+        lblMinFileSize = new Label();
+        numMinFileSize = new NumericUpDown();
         gbResults = new GroupBox();
         gbStatus = new GroupBox();
         gbFilters.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)numMinFileSize).BeginInit();
         gbResults.SuspendLayout();
         gbStatus.SuspendLayout();
         SuspendLayout();
@@ -68,7 +71,6 @@ partial class MainForm
         // cmbSize
         // 
         cmbSize.DropDownStyle = ComboBoxStyle.DropDownList;
-        cmbSize.Items.Clear();
         cmbSize.Items.AddRange(new object[] { "Any size", "Icon", "Small", "Medium", "Large", "X-Large", "XX-Large", "Huge" });
         cmbSize.Location = new Point(354, 22);
         cmbSize.Name = "cmbSize";
@@ -113,15 +115,13 @@ partial class MainForm
         // 
         // lvImages
         // 
-        lvImages.CheckBoxes = false;
         lvImages.Dock = DockStyle.Fill;
         lvImages.LargeImageList = imageListLarge;
         lvImages.Location = new Point(3, 19);
         lvImages.Name = "lvImages";
-        lvImages.Size = new Size(1041, 497);
+        lvImages.Size = new Size(1150, 497);
         lvImages.TabIndex = 10;
         lvImages.UseCompatibleStateImageBehavior = false;
-        lvImages.MultiSelect = true;
         // 
         // imageListLarge
         // 
@@ -131,7 +131,7 @@ partial class MainForm
         // 
         // btnDownload
         // 
-        btnDownload.Location = new Point(857, 22);
+        btnDownload.Location = new Point(820, 21);
         btnDownload.Name = "btnDownload";
         btnDownload.Size = new Size(155, 23);
         btnDownload.TabIndex = 11;
@@ -141,14 +141,14 @@ partial class MainForm
         // 
         progressBar.Location = new Point(6, 121);
         progressBar.Name = "progressBar";
-        progressBar.Size = new Size(1006, 20);
+        progressBar.Size = new Size(1135, 20);
         progressBar.TabIndex = 1;
         // 
         // lblStatus
         // 
         lblStatus.Location = new Point(6, 22);
         lblStatus.Name = "lblStatus";
-        lblStatus.Size = new Size(1006, 28);
+        lblStatus.Size = new Size(1135, 28);
         lblStatus.TabIndex = 2;
         lblStatus.Text = "Ready";
         // 
@@ -159,7 +159,7 @@ partial class MainForm
         txtLog.Name = "txtLog";
         txtLog.ReadOnly = true;
         txtLog.ScrollBars = ScrollBars.Vertical;
-        txtLog.Size = new Size(1006, 63);
+        txtLog.Size = new Size(1135, 63);
         txtLog.TabIndex = 0;
         txtLog.WordWrap = false;
         // 
@@ -173,33 +173,33 @@ partial class MainForm
         gbFilters.Controls.Add(btnSearch);
         gbFilters.Controls.Add(cmbSize);
         gbFilters.Controls.Add(btnDownload);
+        gbFilters.Controls.Add(lblMinFileSize);
+        gbFilters.Controls.Add(numMinFileSize);
         gbFilters.Dock = DockStyle.Top;
         gbFilters.Location = new Point(0, 0);
         gbFilters.Name = "gbFilters";
-        gbFilters.Size = new Size(1047, 64);
+        gbFilters.Size = new Size(1156, 64);
         gbFilters.TabIndex = 12;
         gbFilters.TabStop = false;
         gbFilters.Text = "Search Filters";
-        // Instantiate controls
-        numMinFileSize = new NumericUpDown();
-        lblMinFileSize = new Label();
+        // 
         // lblMinFileSize
-        lblMinFileSize.Location = new Point(860, 22);
+        // 
+        lblMinFileSize.Location = new Point(981, 22);
+        lblMinFileSize.Name = "lblMinFileSize";
         lblMinFileSize.Size = new Size(90, 23);
+        lblMinFileSize.TabIndex = 12;
         lblMinFileSize.Text = "Min Size (KB):";
         lblMinFileSize.TextAlign = ContentAlignment.MiddleRight;
-        lblMinFileSize.Name = "lblMinFileSize";
+        // 
         // numMinFileSize
-        numMinFileSize.Location = new Point(950, 22);
-        numMinFileSize.Minimum = 0;
-        numMinFileSize.Maximum = 10000;
-        numMinFileSize.Value = 200;
-        numMinFileSize.Size = new Size(70, 23);
+        // 
+        numMinFileSize.Location = new Point(1071, 22);
+        numMinFileSize.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
         numMinFileSize.Name = "numMinFileSize";
+        numMinFileSize.Size = new Size(70, 23);
         numMinFileSize.TabIndex = 12;
-        // Add to group box
-        gbFilters.Controls.Add(lblMinFileSize);
-        gbFilters.Controls.Add(numMinFileSize);
+        numMinFileSize.Value = new decimal(new int[] { 200, 0, 0, 0 });
         // 
         // gbResults
         // 
@@ -207,7 +207,7 @@ partial class MainForm
         gbResults.Dock = DockStyle.Fill;
         gbResults.Location = new Point(0, 64);
         gbResults.Name = "gbResults";
-        gbResults.Size = new Size(1047, 519);
+        gbResults.Size = new Size(1156, 519);
         gbResults.TabIndex = 13;
         gbResults.TabStop = false;
         gbResults.Text = "Results";
@@ -220,7 +220,7 @@ partial class MainForm
         gbStatus.Dock = DockStyle.Bottom;
         gbStatus.Location = new Point(0, 428);
         gbStatus.Name = "gbStatus";
-        gbStatus.Size = new Size(1047, 155);
+        gbStatus.Size = new Size(1156, 155);
         gbStatus.TabIndex = 14;
         gbStatus.TabStop = false;
         gbStatus.Text = "Status";
@@ -229,7 +229,7 @@ partial class MainForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(1047, 583);
+        ClientSize = new Size(1156, 583);
         Controls.Add(gbStatus);
         Controls.Add(gbResults);
         Controls.Add(gbFilters);
@@ -237,6 +237,7 @@ partial class MainForm
         Text = "Google Image Downloader";
         gbFilters.ResumeLayout(false);
         gbFilters.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)numMinFileSize).EndInit();
         gbResults.ResumeLayout(false);
         gbStatus.ResumeLayout(false);
         gbStatus.PerformLayout();
